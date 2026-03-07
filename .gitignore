@@ -1,0 +1,15 @@
+# Build output
+server/dist/
+
+# Database backups and sync logs
+db-backups/
+sync-db.log
+
+# Environment files (secrets)
+server/.env
+client/.env.local
+
+# Node modules
+node_modules/
+server/node_modules/
+client/node_modules/
