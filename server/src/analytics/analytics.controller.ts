@@ -1,14 +1,15 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request as Req } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 @Controller('analytics')
 @UseGuards(AuthGuard('jwt'))
 export class AnalyticsController {
-  constructor(private readonly analyticsService: AnalyticsService) { }
+  constructor(private readonly analyticsService: AnalyticsService) {}
 
   @Get()
-  getStats(@Request() req: any) {
-    return this.analyticsService.getUserStats(req.user.userId);
+  getStats(@Req() req: Request & { user?: { userId: string } }) {
+    return this.analyticsService.getUserStats(req.user!.userId);
   }
 }

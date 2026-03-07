@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import api from "@/lib/axios"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Clock, FileQuestion, PlayCircle, Lock, Trophy, Calendar } from "lucide-react"
 import { Navbar } from "@/components/layout/Navbar"
 import { cn } from "@/lib/utils"
@@ -44,9 +44,10 @@ export default function TestsPage() {
             const res = await api.post("/exam/start", { testId })
             const attemptId = res.data.id
             router.push(`/exam/${attemptId}`)
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to start test", error)
-            alert(error.response?.data?.message || "Failed to start test")
+            const err = error as { response?: { data?: { message?: string } } }
+            alert(err.response?.data?.message || "Failed to start test")
         } finally {
             setStarting(null)
         }

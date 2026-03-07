@@ -7,15 +7,24 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, BookOpen, BarChart3, TrendingUp, ShieldCheck, Zap } from "lucide-react"
 
+interface UserData {
+  id: string;
+  email: string;
+  role: string;
+  name?: string;
+}
+
 export default function Home() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const userData = localStorage.getItem("user")
     if (userData) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser(JSON.parse(userData))
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(false)
   }, [])
 
@@ -135,7 +144,7 @@ export default function Home() {
               <div className="bg-foreground rounded-[2rem] p-10 flex flex-col justify-between text-background shadow-xl shadow-foreground/10 md:col-span-2 lg:col-span-1 border-4 border-foreground/50">
                 <div>
                   <ShieldCheck className="w-12 h-12 mb-6" />
-                  <h3 className="text-3xl font-black leading-tight mb-4">You're on track <br /> for Success.</h3>
+                  <h3 className="text-3xl font-black leading-tight mb-4">You&apos;re on track <br /> for Success.</h3>
                   <p className="text-background/80 font-medium">Keep practicing consistently. Last test score: 124.5 / 200</p>
                 </div>
                 <div className="pt-8">

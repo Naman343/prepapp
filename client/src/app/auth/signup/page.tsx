@@ -24,8 +24,9 @@ export default function SignupPage() {
         try {
             await api.post("/auth/signup", { email, password })
             router.push("/auth/login") // Redirect to login
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Signup failed")
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } }
+            setError(error.response?.data?.message || "Signup failed")
         } finally {
             setLoading(false)
         }

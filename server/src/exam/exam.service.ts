@@ -1,10 +1,14 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StartTestDto, SubmitAnswerDto } from './dto/exam.dto';
 
 @Injectable()
 export class ExamService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async startTest(userId: string, startTestDto: StartTestDto) {
     // Check if test exists
@@ -71,8 +75,8 @@ export class ExamService {
     const existingResponse = await this.prisma.response.findFirst({
       where: {
         attemptId: submitDto.attemptId,
-        questionId: submitDto.questionId
-      }
+        questionId: submitDto.questionId,
+      },
     });
 
     if (existingResponse) {
@@ -81,8 +85,8 @@ export class ExamService {
         data: {
           selectedOptionId: submitDto.selectedOptionId,
           isCorrect: option.isCorrect,
-          markedForReview: submitDto.markedForReview ?? false
-        }
+          markedForReview: submitDto.markedForReview ?? false,
+        },
       });
     }
 
@@ -114,13 +118,13 @@ export class ExamService {
     const existingResponse = await this.prisma.response.findFirst({
       where: {
         attemptId,
-        questionId
-      }
+        questionId,
+      },
     });
 
     if (existingResponse) {
       return this.prisma.response.delete({
-        where: { id: existingResponse.id }
+        where: { id: existingResponse.id },
       });
     }
 
@@ -148,7 +152,7 @@ export class ExamService {
       else wrong++;
     });
 
-    const score = (correct * 2) - (wrong * 0.66);
+    const score = correct * 2 - wrong * 0.66;
 
     return this.prisma.testAttempt.update({
       where: { id: attemptId },
@@ -163,7 +167,9 @@ export class ExamService {
   async getExamQuestions(userId: string, attemptId: string) {
     const attempt = await this.prisma.testAttempt.findUnique({
       where: { id: attemptId },
-      include: { test: { include: { questions: { include: { options: true } } } } },
+      include: {
+        test: { include: { questions: { include: { options: true } } } },
+      },
     });
 
     if (!attempt || attempt.userId !== userId) {
@@ -172,7 +178,7 @@ export class ExamService {
 
     if (attempt.status === 'COMPLETED') {
       // If completed, maybe we can show answers? For now, stick to exam scope.
-      // Let's allow viewing history but maybe with answers? 
+      // Let's allow viewing history but maybe with answers?
       // For MVP phase 1, just return questions as is (maybe with answers if calculated).
       // But for ONGOING, must hide answers.
     }
@@ -186,11 +192,13 @@ export class ExamService {
       text: q.text,
       difficulty: q.difficulty,
       topicId: q.topicId,
-      options: q.options.sort(() => 0.5 - Math.random()).map((o) => ({
-        id: o.id,
-        text: o.text,
-        // Omit isCorrect
-      })),
+      options: q.options
+        .sort(() => 0.5 - Math.random())
+        .map((o) => ({
+          id: o.id,
+          text: o.text,
+          // Omit isCorrect
+        })),
       // Omit explanation
     }));
   }
@@ -203,9 +211,9 @@ export class ExamService {
         responses: {
           include: {
             question: { include: { options: true } },
-            selectedOption: true
-          }
-        }
+            selectedOption: true,
+          },
+        },
       },
     });
 

@@ -5,12 +5,20 @@ import { Navbar } from "@/components/layout/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { User, Mail, Shield } from "lucide-react"
 
+interface UserData {
+    id: string;
+    email: string;
+    role: string;
+    name?: string;
+}
+
 export default function ProfilePage() {
-    const [user, setUser] = useState<any>(null)
+    const [user, setUser] = useState<UserData | null>(null)
 
     useEffect(() => {
         const userData = localStorage.getItem("user")
         if (userData) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setUser(JSON.parse(userData))
         }
     }, [])

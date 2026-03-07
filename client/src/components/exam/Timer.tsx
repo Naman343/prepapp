@@ -13,7 +13,7 @@ interface TimerProps {
 export function Timer({ durationMinutes, onTimeUp, startTime }: TimerProps) {
     const totalSeconds = durationMinutes * 60
     const [secondsLeft, setSecondsLeft] = useState(totalSeconds)
-    const [isActive, setIsActive] = useState(true)
+    const [isActive] = useState(true)
 
     useEffect(() => {
         if (startTime) {
@@ -21,6 +21,7 @@ export function Timer({ durationMinutes, onTimeUp, startTime }: TimerProps) {
             const start = new Date(startTime)
             const elapsedSeconds = Math.floor((now.getTime() - start.getTime()) / 1000)
             const remaining = totalSeconds - elapsedSeconds
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setSecondsLeft(remaining > 0 ? remaining : 0)
         }
     }, [startTime, totalSeconds])

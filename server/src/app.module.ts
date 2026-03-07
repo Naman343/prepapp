@@ -9,7 +9,14 @@ import { ExamModule } from './exam/exam.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, QuestionsModule, TestsModule, ExamModule, AnalyticsModule],
+  imports: [
+    AuthModule,
+    PrismaModule,
+    QuestionsModule,
+    TestsModule,
+    ExamModule,
+    AnalyticsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
