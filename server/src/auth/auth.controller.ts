@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Request as Req,
-} from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request as Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
@@ -25,5 +19,15 @@ export class AuthController {
   @Post('signup')
   async signup(@Body() body: { email: string; password: string }) {
     return this.authService.register(body.email, body.password);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  async me(@Req() req: Request & { user?: { userId: string; email: string; role: string } }) {
+    return {
+      id: req.user!.userId,
+      email: req.user!.email,
+      role: req.user!.role,
+    };
   }
 }

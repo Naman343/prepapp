@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, BookOpen, BarChart3, TrendingUp, ShieldCheck, Zap } from "lucide-react"
+import api from "@/lib/axios"
 
 interface UserData {
   id: string;
@@ -19,13 +20,22 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const userData = localStorage.getItem("user")
-    if (userData) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUser(JSON.parse(userData))
+    const token = localStorage.getItem("token")
+    if (!token) {
+      setLoading(false)
+      return
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(false)
+    api.get("/auth/me")
+      .then(res => {
+        setUser(res.data)
+        localStorage.setItem("user", JSON.stringify(res.data))
+      })
+      .catch(() => {
+        // Token expired or invalid — clear stale data
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+      })
+      .finally(() => setLoading(false))
   }, [])
 
   if (loading) return (
@@ -84,7 +94,7 @@ export default function Home() {
             <header className="mb-12">
               <h2 className="text-[10px] uppercase font-bold text-blue-600 tracking-[0.3em] mb-2">DASHBOARD</h2>
               <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
-                Welcome back, {user.name?.split(' ')[0]}
+                Welcome back, {user.email?.split('@')[0]}
                 <span className="text-blue-500">👋</span>
               </h1>
             </header>
@@ -107,10 +117,8 @@ export default function Home() {
                   <p className="text-muted-foreground font-medium">Standard 100 question Prelims GS Papers with marking scheme simulation.</p>
                 </CardContent>
                 <CardFooter className="relative">
-                  <Link href="/tests" className="w-full">
-                    <Button className="w-full h-14 rounded-2xl bg-foreground hover:bg-foreground/90 text-background font-black text-sm tracking-widest uppercase transition-all duration-300">
-                      View Tests <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
+                  <Link href="/tests" className="group inline-flex items-center text-sm font-black uppercase tracking-widest border-b-2 border-foreground pb-1 cursor-pointer">
+                    View Tests <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </CardFooter>
               </Card>
@@ -132,10 +140,8 @@ export default function Home() {
                   <p className="text-muted-foreground font-medium">Track accuracy, weak topics, and compare with previous attempts.</p>
                 </CardContent>
                 <CardFooter className="relative">
-                  <Link href="/analytics" className="w-full">
-                    <Button variant="outline" className="w-full h-14 rounded-2xl border-2 font-black text-sm tracking-widest uppercase hover:bg-muted/50 transition-all duration-300">
-                      Analytics Explorer <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
+                  <Link href="/analytics" className="group inline-flex items-center text-sm font-black uppercase tracking-widest border-b-2 border-foreground pb-1 cursor-pointer">
+                    Analytics Explorer <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </CardFooter>
               </Card>
