@@ -1,9 +1,26 @@
 import { PrismaClient, Difficulty } from '@prisma/client'
 
 const prisma = new PrismaClient()
+import * as bcrypt from 'bcrypt';
+
 
 async function main() {
     console.log('Seeding data...')
+
+    // 0. Create Test User
+    const registerPassword = 'Password123';
+    const hashedPassword = await bcrypt.hash(registerPassword, 10);
+    const testUser = await prisma.user.upsert({
+        where: { email: 'test@example.com' },
+        update: {},
+        create: {
+            email: 'test@example.com',
+            passwordHash: hashedPassword,
+            role: 'USER',
+        }
+    });
+    console.log('Test User created: test@example.com / Password123');
+
 
     // 1. Create Subject (Required for Topics)
     const gsSubject = await prisma.subject.create({
