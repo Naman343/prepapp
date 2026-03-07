@@ -68,23 +68,23 @@ export default function TestsPage() {
     return (
         <div className="min-h-screen bg-muted/20 flex flex-col font-sans">
             <Navbar />
-            <div className="flex-1 container mx-auto p-8 max-w-7xl px-6 md:px-12">
-                <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-l-4 border-foreground pl-6">
+            <div className="flex-1 container mx-auto p-4 sm:p-8 max-w-7xl px-4 sm:px-6 md:px-12">
+                <header className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4 border-l-4 border-foreground pl-4 sm:pl-6">
                     <div>
                         <h2 className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.3em] mb-2">PRACTICE REPOSITORY</h2>
-                        <h1 className="text-5xl font-black tracking-tight text-foreground">Available Mock Tests</h1>
+                        <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-foreground">Available Mock Tests</h1>
                     </div>
-                    <div className="flex items-center gap-4 bg-background px-6 py-3 rounded-2xl border border-border/50 shadow-sm">
-                        <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1 text-right">Next Live Test</span>
+                    <div className="flex items-center gap-3 bg-background px-4 py-2.5 rounded-2xl border border-border/50 shadow-sm self-start md:self-auto">
+                        <div className="flex flex-col">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-1">Next Live Test</span>
                             <span className="text-sm font-black text-foreground">12th Jan, 10:00 AM</span>
                         </div>
-                        <Calendar className="w-6 h-6 text-foreground" />
+                        <Calendar className="w-5 h-5 text-foreground" />
                     </div>
                 </header>
 
                 {tests.length === 0 ? (
-                    <div className="text-center p-24 border-4 border-dashed rounded-[3rem] bg-background/50 flex flex-col items-center gap-6">
+                    <div className="text-center p-8 sm:p-24 border-4 border-dashed rounded-4xl sm:rounded-[3rem] bg-background/50 flex flex-col items-center gap-6">
                         <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center">
                             <Lock className="w-10 h-10 text-muted-foreground" />
                         </div>
@@ -94,7 +94,7 @@ export default function TestsPage() {
                         </p>
                     </div>
                 ) : (
-                    <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 sm:gap-10 sm:grid-cols-2 lg:grid-cols-3">
                         {tests.map((test) => (
                             <Card key={test.id} className="group flex flex-col bg-background border-2 border-border/50 hover:border-foreground transition-all duration-500 rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-foreground/5">
                                 <CardHeader className="p-8 space-y-6">
@@ -108,7 +108,7 @@ export default function TestsPage() {
                                     </div>
 
                                     <div className="space-y-4">
-                                        <CardTitle className="text-2xl font-black leading-[1.1] transition-colors group-hover:text-foreground">
+                                        <CardTitle className="text-xl sm:text-2xl font-black leading-[1.1] transition-colors group-hover:text-foreground">
                                             {test.title}
                                         </CardTitle>
                                         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
