@@ -59,9 +59,9 @@ export function Timer({ durationMinutes, onTimeUp, startTime }: TimerProps) {
     const strokeDashoffset = circumference - (percentage / 100) * circumference
 
     return (
-        <div className="flex items-center gap-4 bg-muted/30 px-4 py-2 rounded-full border border-border/50 shadow-sm">
-            <div className="relative flex items-center justify-center w-12 h-12">
-                <svg className="w-full h-full -rotate-90">
+        <div className="flex items-center gap-3 bg-muted/30 px-4 py-1.5 rounded-full border border-border/50 shadow-sm">
+            <div className="relative flex items-center justify-center w-9 h-9 shrink-0">
+                <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
                     <circle
                         cx="24"
                         cy="24"
@@ -88,13 +88,13 @@ export function Timer({ durationMinutes, onTimeUp, startTime }: TimerProps) {
                     />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
                 </div>
             </div>
 
             <div className="flex flex-col">
                 <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground leading-none">Time Remaining</span>
-                <span className={cn("text-lg font-mono font-bold leading-tight", {
+                <span className={cn("text-xl font-mono font-bold leading-tight", {
                     "text-red-500 animate-pulse": secondsLeft < 300,
                 })}>
                     {formatTime(secondsLeft)}
