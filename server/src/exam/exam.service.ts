@@ -187,7 +187,7 @@ export class ExamService {
     const questions = attempt.test.questions.sort(() => 0.5 - Math.random());
 
     // Sanitize (Hide correct answer)
-    return questions.map((q) => ({
+    const sanitizedQuestions = questions.map((q) => ({
       id: q.id,
       text: q.text,
       difficulty: q.difficulty,
@@ -201,6 +201,12 @@ export class ExamService {
         })),
       // Omit explanation
     }));
+
+    return {
+      questions: sanitizedQuestions,
+      startTime: attempt.startTime,
+      duration: attempt.test.duration,
+    };
   }
 
   async getAttemptResult(userId: string, attemptId: string) {

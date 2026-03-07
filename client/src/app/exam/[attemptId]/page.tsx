@@ -34,7 +34,8 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
     const [markedQuestions, setMarkedQuestions] = useState<Set<string>>(new Set())
     const [visitedQuestions, setVisitedQuestions] = useState<Set<string>>(new Set())
     const [submitting, setSubmitting] = useState(false)
-    const [testDuration] = useState(120)
+    const [testDuration, setTestDuration] = useState(120)
+    const [examStartTime, setExamStartTime] = useState<Date | undefined>(undefined)
     const [userName, setUserName] = useState('User')
     const [isMounted, setIsMounted] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
@@ -53,10 +54,13 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
         const init = async () => {
             try {
                 const res = await api.get(`/exam/${attemptId}/questions`)
-                setQuestions(res.data)
+                const { questions, startTime, duration } = res.data
+                setQuestions(questions)
+                setExamStartTime(new Date(startTime))
+                setTestDuration(duration)
                 // Mark first question as visited
-                if (res.data.length > 0) {
-                    setVisitedQuestions(new Set([res.data[0].id]))
+                if (questions.length > 0) {
+                    setVisitedQuestions(new Set([questions[0].id]))
                 }
             } catch (error) {
                 console.error("Failed to load exam", error)
@@ -195,7 +199,7 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                         </select>
                     </div>
 
-                    <Timer durationMinutes={testDuration} onTimeUp={handleFinishTest} />
+                    <Timer durationMinutes={testDuration} startTime={examStartTime} onTimeUp={handleFinishTest} />
 
                     <button
                         className="lg:hidden p-2 rounded-lg border border-border hover:bg-muted transition-colors"

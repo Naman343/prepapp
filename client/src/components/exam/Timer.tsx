@@ -93,7 +93,7 @@ export function Timer({ durationMinutes, onTimeUp, startTime }: TimerProps) {
             </div>
 
             <div className="flex flex-col">
-                <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground leading-none">Time Remaining</span>
+                <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground leading-none">Time Remaining</span>
                 <span className={cn("text-xl font-mono font-bold leading-tight", {
                     "text-red-500 animate-pulse": secondsLeft < 300,
                 })}>
