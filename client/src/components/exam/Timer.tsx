@@ -59,8 +59,8 @@ export function Timer({ durationMinutes, onTimeUp, startTime }: TimerProps) {
     const strokeDashoffset = circumference - (percentage / 100) * circumference
 
     return (
-        <div className="flex items-center gap-3 bg-muted/30 px-4 py-1.5 rounded-full border border-border/50 shadow-sm">
-            <div className="relative flex items-center justify-center w-9 h-9 shrink-0">
+        <div className="flex items-center gap-3 bg-muted/30 pl-2 pr-4 py-0 rounded-full border border-border/50 shadow-sm">
+            <div className="relative flex items-center justify-center w-12 h-12 shrink-0">
                 <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
                     <circle
                         cx="24"
