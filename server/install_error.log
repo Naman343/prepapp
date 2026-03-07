@@ -1,0 +1,15 @@
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'prisma@7.2.0',
+npm warn EBADENGINE   required: { node: '^20.19 || ^22.12 || >=24.0' },
+npm warn EBADENGINE   current: { node: 'v20.15.0', npm: '10.7.0' }
+npm warn EBADENGINE }
+npm error code 1
+npm error path C:\Users\NASI\Desktop\Prepapp\server\node_modules\prisma
+npm error command failed
+npm error command C:\WINDOWS\system32\cmd.exe /d /s /c node scripts/preinstall-entry.js
+npm error ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+npm error Γöé    Prisma only supports Node.js versions 20.19+, 22.12+, 24.0+.    Γöé
+npm error Γöé    Please upgrade your Node.js version.                            Γöé
+npm error ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ
+
+npm error A complete log of this run can be found in: C:\Users\NASI\AppData\Local\npm-cache\_logs\2026-01-08T20_07_48_006Z-debug-0.log

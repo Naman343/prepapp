@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  
+  testAttempts  TestAttempt[]
+}
+
+model Subject {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  topics    Topic[]
+}
+
+model Topic {
+  id        String     @id @default(uuid())
+  name      String
+  subjectId String
+  subject   Subject    @relation(fields: [subjectId], references: [id])
+  questions Question[]
+}
+
+model Question {
+  id          String     @id @default(uuid())
+  text        String
+  imageUrl    String?
+  difficulty  Difficulty
+  explanation String?
+  
+  topicId     String
+  topic       Topic      @relation(fields: [topicId], references: [id])
+  
+  options     Option[]
+  
+  // Implicit many-to-many with Tests if we want to reuse questions across tests
+  tests       Test[]     @relation("TestQuestions")
+  
+  responses   Response[]
+}
+
+model Option {
+  id          String   @id @default(uuid())
+  text        String
+  isCorrect   Boolean  @default(false)
+  
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+  
+  responses   Response[]
+}
+
+model Test {
+  id             String   @id @default(uuid())
+  title          String
+  duration       Int      // in minutes
+  totalQuestions Int
+  isPublished    Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  
+  questions      Question[] @relation("TestQuestions")
+  
+  attempts       TestAttempt[]
+}
+
+model TestAttempt {
+  id          String    @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  
+  testId      String
+  test        Test      @relation(fields: [testId], references: [id])
+  
+  startTime   DateTime  @default(now())
+  submitTime  DateTime?
+  score       Float?
+  
+  // Status can be derived (if submitTime != null -> COMPLETED), but explicit status helps
+  status      String    @default("ONGOING") // ONGOING, COMPLETED
+  
+  responses   Response[]
+}
+
+model Response {
+  id          String      @id @default(uuid())
+  attemptId   String
+  attempt     TestAttempt @relation(fields: [attemptId], references: [id])
+  
+  questionId  String
+  question    Question    @relation(fields: [questionId], references: [id])
+  
+  selectedOptionId String
+  selectedOption   Option   @relation(fields: [selectedOptionId], references: [id])
+  
+  isCorrect   Boolean
+  timeTaken   Int?        // in seconds (optional for now)
+  markedForReview Boolean  @default(false)
+}
