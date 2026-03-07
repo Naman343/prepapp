@@ -4,7 +4,7 @@
 # ============================================================
 
 # ---------- MASTER SERVER (Bhaiya's) ----------
-$MASTER_HOST     = "10.164.249.253"
+$MASTER_HOST     = "LAPTOP-I6GVMCAT"  # bhaiya ka hostname - IP change hone pe bhi kaam karega
 $MASTER_PORT     = "5434"
 $MASTER_DB       = "prepapp"
 $MASTER_USER     = "postgres"
