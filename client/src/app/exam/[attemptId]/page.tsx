@@ -35,6 +35,17 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
     const [visitedQuestions, setVisitedQuestions] = useState<Set<string>>(new Set())
     const [submitting, setSubmitting] = useState(false)
     const [testDuration, setTestDuration] = useState(120)
+    const [userName, setUserName] = useState('User')
+    const [isMounted, setIsMounted] = useState(false)
+    const [showConfirm, setShowConfirm] = useState(false)
+
+    useEffect(() => {
+        setIsMounted(true)
+        if (typeof window !== 'undefined') {
+            const storedName = localStorage.getItem('userName')
+            if (storedName) setUserName(storedName)
+        }
+    }, [])
 
     // Fetch Questions
     useEffect(() => {
@@ -269,7 +280,7 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                         <div className="flex flex-col">
                             <span className="text-[10px] uppercase font-bold text-muted-foreground leading-none mb-1">CANDIDATE</span>
                             <span className="text-sm font-bold text-foreground tracking-tight">
-                                {typeof window !== 'undefined' ? localStorage.getItem('userName') || 'User' : 'User'}
+                                {isMounted ? userName : 'User'}
                             </span>
                         </div>
                     </div>
@@ -298,13 +309,33 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                         </div>
                         <Button
                             variant="outline"
-                            className="w-full h-12 font-black uppercase tracking-widest border-2 border-border hover:bg-muted hover:border-foreground/30 hover:shadow-md active:scale-[0.98] rounded-xl transition-all duration-300"
+                            className={cn(
+                                "w-full h-12 font-black uppercase tracking-widest border-2 transition-all duration-300 rounded-xl",
+                                showConfirm 
+                                    ? "bg-red-500 border-red-600 text-white hover:bg-red-600" 
+                                    : "border-border hover:bg-muted hover:border-foreground/30 shadow-sm"
+                            )}
                             onClick={() => {
-                                if (confirm("Proceed to submit test?")) handleFinishTest()
+                                if (showConfirm) {
+                                    handleFinishTest()
+                                } else {
+                                    setShowConfirm(true)
+                                    // Reset after 3 seconds if not clicked again
+                                    setTimeout(() => setShowConfirm(false), 3000)
+                                }
                             }}
                             disabled={submitting}
                         >
-                            {submitting ? <Loader2 className="animate-spin" /> : <><CheckCircle className="w-5 h-5 mr-3" /> Submit Test</>}
+                            {submitting ? (
+                                <Loader2 className="animate-spin" />
+                            ) : showConfirm ? (
+                                "Confirm Submit?"
+                            ) : (
+                                <>
+                                    <CheckCircle className="w-5 h-5 mr-3" />
+                                    Submit Test
+                                </>
+                            )}
                         </Button>
                     </div>
                 </div>
