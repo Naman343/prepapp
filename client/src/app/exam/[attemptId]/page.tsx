@@ -34,7 +34,7 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
     const [markedQuestions, setMarkedQuestions] = useState<Set<string>>(new Set())
     const [visitedQuestions, setVisitedQuestions] = useState<Set<string>>(new Set())
     const [submitting, setSubmitting] = useState(false)
-    const [testDuration, setTestDuration] = useState(120)
+    const [testDuration] = useState(120)
     const [userName, setUserName] = useState('User')
     const [isMounted, setIsMounted] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)

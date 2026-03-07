@@ -3,15 +3,40 @@
 import { useEffect, useState, use } from "react"
 import Link from "next/link"
 import api from "@/lib/axios"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Loader2, CheckCircle, XCircle, ArrowLeft, Trophy, Target, Clock, AlertCircle, ChevronRight, Zap } from "lucide-react"
+import { CheckCircle, XCircle, ArrowLeft, Trophy, Target, Clock, AlertCircle, ChevronRight, Zap } from "lucide-react"
 import { Navbar } from "@/components/layout/Navbar"
 import { cn } from "@/lib/utils"
 
+interface TestResult {
+    test: {
+        title: string;
+        totalQuestions: number;
+    }
+    score: number;
+    startTime: string;
+    submitTime: string;
+    responses: Array<{
+        id: string;
+        isCorrect: boolean;
+        selectedOptionId: string;
+        question: {
+            text: string;
+            difficulty: string;
+            explanation: string;
+            options: Array<{
+                id: string;
+                text: string;
+                isCorrect: boolean;
+            }>
+        }
+    }>
+}
+
 export default function ResultPage({ params }: { params: Promise<{ attemptId: string }> }) {
     const { attemptId } = use(params)
-    const [result, setResult] = useState<any>(null)
+    const [result, setResult] = useState<TestResult | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -50,7 +75,7 @@ export default function ResultPage({ params }: { params: Promise<{ attemptId: st
     )
 
     const totalQuestions = result.test.totalQuestions
-    const correctCount = result.responses.filter((r: any) => r.isCorrect).length
+    const correctCount = result.responses.filter((r) => r.isCorrect).length
     const attemptedCount = result.responses.length
     const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0
 
@@ -140,7 +165,7 @@ export default function ResultPage({ params }: { params: Promise<{ attemptId: st
                     </header>
 
                     <div className="grid gap-8">
-                        {result.responses.map((response: any, index: number) => (
+                        {result.responses.map((response, index: number) => (
                             <Card key={response.id} className={cn(
                                 "group border-2 transition-all duration-300 rounded-[3rem] overflow-hidden bg-background",
                                 response.isCorrect
@@ -189,7 +214,7 @@ export default function ResultPage({ params }: { params: Promise<{ attemptId: st
                                         </h3>
 
                                         <div className="grid gap-3">
-                                            {response.question.options.map((opt: any, optIndex: number) => {
+                                            {response.question.options.map((opt, optIndex: number) => {
                                                 const isSelected = opt.id === response.selectedOptionId;
                                                 const isCorrect = opt.isCorrect;
                                                 const label = String.fromCharCode(65 + optIndex);

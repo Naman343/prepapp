@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import api from "@/lib/axios"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, TrendingUp, Target, BookOpen, ChevronRight, Award, Zap } from "lucide-react"
+import { TrendingUp, Target, BookOpen, Award, Zap } from "lucide-react"
 import { Navbar } from "@/components/layout/Navbar"
 import { cn } from "@/lib/utils"
 
@@ -28,8 +28,21 @@ function StatusBadge({ status }: { status: string }) {
     )
 }
 
+interface TopicPerformance {
+    topic: string;
+    accuracy: number;
+    status: string;
+}
+
+interface AnalyticsStats {
+    totalTests: number;
+    overallAccuracy: number;
+    averageScore: number;
+    topicPerformance: TopicPerformance[];
+}
+
 export default function AnalyticsPage() {
-    const [stats, setStats] = useState<any>(null)
+    const [stats, setStats] = useState<AnalyticsStats | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
@@ -153,7 +166,7 @@ export default function AnalyticsPage() {
                                     <p className="text-xs text-muted-foreground/60 font-bold max-w-xs">Participate in a mock test to unlock deep topic-wise analytical insights and strength classification.</p>
                                 </div>
                             ) : (
-                                stats.topicPerformance.map((topic: any) => (
+                                stats.topicPerformance.map((topic) => (
                                     <div key={topic.topic} className="group flex flex-col md:flex-row items-start md:items-center justify-between p-6 rounded-[2rem] hover:bg-muted/30 transition-all border-2 border-transparent hover:border-border/50">
                                         <div className="flex-1 w-full md:mr-12 mb-4 md:mb-0">
                                             <div className="flex items-center justify-between mb-3">

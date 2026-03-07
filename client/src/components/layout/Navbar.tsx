@@ -4,12 +4,19 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { User, LogOut, Home } from "lucide-react"
+import { User, LogOut } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
+
+interface UserData {
+    id: string;
+    email: string;
+    role: string;
+    name?: string;
+}
 
 export function Navbar() {
     const router = useRouter()
-    const [user, setUser] = useState<any>(null)
+    const [user, setUser] = useState<UserData | null>(null)
 
     // We need to sync user state across pages. For MVP, reading from localStorage on mount is fine.
     // Ideally use Context or Zustand. To handle updates (like logout), we might rely on window reload or event, 
@@ -18,6 +25,7 @@ export function Navbar() {
     useEffect(() => {
         const userData = localStorage.getItem("user")
         if (userData) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setUser(JSON.parse(userData))
         }
     }, [])

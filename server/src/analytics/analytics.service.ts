@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async getUserStats(userId: string) {
     const attempts = await this.prisma.testAttempt.findMany({
@@ -12,10 +12,10 @@ export class AnalyticsService {
         test: true,
         responses: {
           include: {
-            question: { select: { topic: true } }
-          }
-        }
-      }
+            question: { select: { topic: true } },
+          },
+        },
+      },
     });
 
     if (attempts.length === 0) {
@@ -23,7 +23,7 @@ export class AnalyticsService {
         totalTests: 0,
         averageScore: 0,
         overallAccuracy: 0,
-        topicPerformance: []
+        topicPerformance: [],
       };
     }
 
@@ -32,12 +32,15 @@ export class AnalyticsService {
     let totalCorrect = 0;
 
     // Topic-wise stats
-    const topicStats: Record<string, { correct: number; total: number; name: string }> = {};
+    const topicStats: Record<
+      string,
+      { correct: number; total: number; name: string }
+    > = {};
 
-    attempts.forEach(attempt => {
+    attempts.forEach((attempt) => {
       totalScore += attempt.score || 0;
 
-      attempt.responses.forEach(r => {
+      attempt.responses.forEach((r) => {
         totalQuestionsAttempted++;
         if (r.isCorrect) totalCorrect++;
 
@@ -51,11 +54,14 @@ export class AnalyticsService {
     });
 
     const averageScore = totalScore / attempts.length;
-    const overallAccuracy = totalQuestionsAttempted > 0 ? (totalCorrect / totalQuestionsAttempted) * 100 : 0;
+    const overallAccuracy =
+      totalQuestionsAttempted > 0
+        ? (totalCorrect / totalQuestionsAttempted) * 100
+        : 0;
 
     // Rules for Topic Strength
     // Strong: >= 70% | Moderate: 40-69% | Weak: < 40%
-    const topicPerformance = Object.values(topicStats).map(t => {
+    const topicPerformance = Object.values(topicStats).map((t) => {
       const accuracy = (t.correct / t.total) * 100;
       let status = 'WEAK';
       if (accuracy >= 70) status = 'STRONG';
@@ -64,7 +70,7 @@ export class AnalyticsService {
       return {
         topic: t.name,
         accuracy: parseFloat(accuracy.toFixed(2)),
-        status
+        status,
       };
     });
 
@@ -72,7 +78,7 @@ export class AnalyticsService {
       totalTests: attempts.length,
       averageScore: parseFloat(averageScore.toFixed(2)),
       overallAccuracy: parseFloat(overallAccuracy.toFixed(2)),
-      topicPerformance
+      topicPerformance,
     };
   }
 }

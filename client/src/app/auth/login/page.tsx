@@ -26,8 +26,9 @@ export default function LoginPage() {
             localStorage.setItem("token", res.data.access_token)
             localStorage.setItem("user", JSON.stringify(res.data.user))
             router.push("/") // Go to dashboard
-        } catch (err: any) {
-            setError(err.response?.data?.message || "Login failed")
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } }
+            setError(error.response?.data?.message || "Login failed")
         } finally {
             setLoading(false)
         }
@@ -70,7 +71,7 @@ export default function LoginPage() {
                             {loading ? "Logging in..." : "Login"}
                         </Button>
                         <div className="text-sm text-center text-muted-foreground">
-                            Don't have an account?{" "}
+                            Don&apos;t have an account?{" "}
                             <Link href="/auth/signup" className="underline underline-offset-4 hover:text-primary">
                                 Sign up
                             </Link>
