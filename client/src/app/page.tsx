@@ -55,7 +55,7 @@ export default function Home() {
         {!user ? (
           <div className="flex-1 flex flex-col items-center justify-center px-6 py-24 relative overflow-hidden">
             {/* Background Decorative Elements */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1400px] pointer-events-none opacity-50">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-350 pointer-events-none opacity-50">
               <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-400/20 blur-[120px] rounded-full" />
               <div className="absolute top-1/2 right-1/4 w-96 h-96 bg-yellow-400/10 blur-[120px] rounded-full" />
             </div>
@@ -71,7 +71,7 @@ export default function Home() {
                 <span className="text-foreground">Simplified.</span>
               </h1>
 
-              <p className="text-xl text-muted-foreground font-medium max-w-[640px] mx-auto animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
+              <p className="text-xl text-muted-foreground font-medium max-w-160 mx-auto animate-in fade-in slide-in-from-bottom-12 duration-700 delay-200">
                 Practice high-fidelity UPSC Prelims mocks with advanced analytics and negative marking simulation.
               </p>
 
@@ -100,7 +100,7 @@ export default function Home() {
             </header>
 
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="group relative overflow-hidden bg-background border-2 border-border/50 hover:border-foreground transition-all duration-300 rounded-[2rem] p-4 shadow-sm hover:shadow-xl hover:shadow-foreground/5">
+              <Card className="group relative overflow-hidden bg-background border-2 border-border/50 hover:border-foreground transition-all duration-300 rounded-4xl p-4 shadow-sm hover:shadow-xl hover:shadow-foreground/5">
                 <div className="absolute top-0 right-0 p-8 text-foreground/5 group-hover:text-foreground/10 transition-colors">
                   <BookOpen className="w-24 h-24 rotate-12" />
                 </div>
@@ -123,7 +123,7 @@ export default function Home() {
                 </CardFooter>
               </Card>
 
-              <Card className="group relative overflow-hidden bg-background border-2 border-border/50 hover:border-foreground transition-all duration-300 rounded-[2rem] p-4 shadow-sm hover:shadow-xl hover:shadow-foreground/5">
+              <Card className="group relative overflow-hidden bg-background border-2 border-border/50 hover:border-foreground transition-all duration-300 rounded-4xl p-4 shadow-sm hover:shadow-xl hover:shadow-foreground/5">
                 <div className="absolute top-0 right-0 p-8 text-foreground/5 group-hover:text-foreground/10 transition-colors">
                   <BarChart3 className="w-24 h-24 -rotate-12" />
                 </div>
@@ -147,7 +147,7 @@ export default function Home() {
               </Card>
 
               {/* Status Card */}
-              <div className="bg-foreground rounded-[2rem] p-10 flex flex-col justify-between text-background shadow-xl shadow-foreground/10 md:col-span-2 lg:col-span-1 border-4 border-foreground/50">
+              <div className="bg-foreground rounded-4xl p-10 flex flex-col justify-between text-background shadow-xl shadow-foreground/10 md:col-span-2 lg:col-span-1 border-4 border-foreground/50">
                 <div>
                   <ShieldCheck className="w-12 h-12 mb-6" />
                   <h3 className="text-3xl font-black leading-tight mb-4">You&apos;re on track <br /> for Success.</h3>

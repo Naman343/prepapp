@@ -1,4 +1,5 @@
 import { PrismaClient, Difficulty } from '@prisma/client'
+import { randomBytes } from 'crypto'
 
 const prisma = new PrismaClient()
 import * as bcrypt from 'bcrypt';
@@ -17,6 +18,7 @@ async function main() {
             email: 'test@example.com',
             passwordHash: hashedPassword,
             role: 'USER',
+            memberId: randomBytes(6).toString('hex'),
         }
     });
     console.log('Test User created: test@example.com / Password123');
