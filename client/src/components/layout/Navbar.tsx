@@ -78,7 +78,7 @@ export function Navbar() {
                     ) : (
                         <div className="flex items-center gap-3">
                             <Link href="/auth/login">
-                                <Button variant="ghost" className="font-bold text-sm tracking-tight px-6 h-11 rounded-xl">Login</Button>
+                                <Button variant="ghost" className="font-bold text-sm tracking-tight px-6 h-11 rounded-xl hover:bg-muted hover:scale-105 transition-all duration-200">Login</Button>
                             </Link>
                             <Link href="/auth/signup">
                                 <Button className="bg-blue-600 hover:bg-blue-700 text-white font-black text-sm tracking-tight px-8 h-11 rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all">Sign Up Free</Button>

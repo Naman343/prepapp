@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Timer } from "@/components/exam/Timer"
 import { QuestionCard } from "@/components/exam/QuestionCard"
 import { QuestionPalette } from "@/components/exam/QuestionPalette"
-import { Loader2, ChevronLeft, ChevronRight, CheckCircle, User, Info, HelpCircle } from "lucide-react"
+import { Loader2, ChevronLeft, ChevronRight, CheckCircle, User, Info, HelpCircle, LayoutGrid } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { cn } from "@/lib/utils"
 
@@ -34,10 +34,12 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
     const [markedQuestions, setMarkedQuestions] = useState<Set<string>>(new Set())
     const [visitedQuestions, setVisitedQuestions] = useState<Set<string>>(new Set())
     const [submitting, setSubmitting] = useState(false)
-    const [testDuration] = useState(120)
+    const [testDuration, setTestDuration] = useState(120)
+    const [examStartTime, setExamStartTime] = useState<Date | undefined>(undefined)
     const [userName, setUserName] = useState('User')
     const [isMounted, setIsMounted] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
+    const [showPalette, setShowPalette] = useState(false)
 
     useEffect(() => {
         setIsMounted(true)
@@ -52,10 +54,13 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
         const init = async () => {
             try {
                 const res = await api.get(`/exam/${attemptId}/questions`)
-                setQuestions(res.data)
+                const { questions, startTime, duration } = res.data
+                setQuestions(questions)
+                setExamStartTime(new Date(startTime))
+                setTestDuration(duration)
                 // Mark first question as visited
-                if (res.data.length > 0) {
-                    setVisitedQuestions(new Set([res.data[0].id]))
+                if (questions.length > 0) {
+                    setVisitedQuestions(new Set([questions[0].id]))
                 }
             } catch (error) {
                 console.error("Failed to load exam", error)
@@ -185,7 +190,7 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                     </div>
                 </div>
 
-                <div className="flex items-center gap-8">
+                <div className="flex items-center gap-3 md:gap-8">
                     <div className="hidden md:flex items-center gap-2 bg-muted px-3 py-1.5 rounded-lg border border-border/50">
                         <span className="text-[10px] font-bold text-muted-foreground uppercase">Viewing in:</span>
                         <select className="bg-transparent text-sm font-bold outline-none cursor-pointer">
@@ -194,16 +199,24 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                         </select>
                     </div>
 
-                    <Timer durationMinutes={testDuration} onTimeUp={handleFinishTest} />
+                    <Timer durationMinutes={testDuration} startTime={examStartTime} onTimeUp={handleFinishTest} />
+
+                    <button
+                        className="lg:hidden p-2 rounded-lg border border-border hover:bg-muted transition-colors"
+                        onClick={() => setShowPalette(!showPalette)}
+                        aria-label="Toggle question palette"
+                    >
+                        <LayoutGrid className="w-5 h-5" />
+                    </button>
 
                     <ThemeToggle />
                 </div>
             </header>
 
             {/* Main Content Layout */}
-            <div className="flex-1 flex overflow-hidden container-fluid max-w-[1600px] mx-auto w-full">
+            <div className="flex-1 flex overflow-hidden container-fluid max-w-400 mx-auto w-full">
                 {/* Left Area: Question Area */}
-                <div className="flex-1 flex flex-col relative">
+                <div className="flex-1 flex flex-col relative min-w-0">
                     <div className="flex-1 p-4 md:p-6 overflow-y-auto pb-24">
                         <div className="max-w-4xl mx-auto">
                             <QuestionCard
@@ -216,36 +229,38 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                     </div>
 
                     {/* Fixed Action Footer */}
-                    <footer className="absolute bottom-0 left-0 right-0 h-16 bg-background border-t shadow-2xl z-40 flex items-center px-6 border-r border-border/50">
-                        <div className="max-w-4xl w-full mx-auto flex items-center justify-between gap-4">
-                            <div className="flex gap-4">
+                    <footer className="absolute bottom-0 left-0 right-0 h-16 bg-background border-t shadow-2xl z-40 flex items-center px-3 md:px-6 border-r border-border/50">
+                        <div className="max-w-4xl w-full mx-auto flex items-center justify-between gap-2 md:gap-4">
+                            <div className="flex gap-2">
                                 <Button
                                     variant="outline"
                                     size="lg"
                                     onClick={handleClearResponse}
                                     disabled={!answers[currentQuestion.id]}
-                                    className="h-10 px-6 font-semibold border-2 hover:bg-muted active:scale-95 transition-all duration-200"
+                                    className="h-9 md:h-10 px-3 md:px-6 font-semibold border-2 hover:bg-muted active:scale-95 transition-all duration-200 text-xs md:text-sm"
                                 >
-                                    Clear Response
+                                    <span className="hidden sm:inline">Clear Response</span>
+                                    <span className="sm:hidden">Clear</span>
                                 </Button>
                                 <Button
                                     variant="outline"
                                     size="lg"
                                     onClick={handleMarkForReview}
                                     disabled={!answers[currentQuestion.id] || markedQuestions.has(currentQuestion.id)}
-                                    className="h-10 px-6 font-semibold border-2 hover:bg-muted active:scale-95 transition-all duration-200"
+                                    className="h-9 md:h-10 px-3 md:px-6 font-semibold border-2 hover:bg-muted active:scale-95 transition-all duration-200 text-xs md:text-sm"
                                 >
-                                    Mark for Review & Next
+                                    <span className="hidden sm:inline">Mark for Review & Next</span>
+                                    <span className="sm:hidden">Mark</span>
                                 </Button>
                             </div>
 
-                            <div className="flex gap-4 items-center">
+                            <div className="flex gap-2 items-center">
                                 <Button
                                     variant="outline"
                                     size="icon"
                                     onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))}
                                     disabled={currentIndex === 0}
-                                    className="h-10 w-10 rounded-lg border-2 hover:bg-muted active:scale-75 transition-all duration-200"
+                                    className="h-9 w-9 md:h-10 md:w-10 rounded-lg border-2 hover:bg-muted active:scale-75 transition-all duration-200"
                                 >
                                     <ChevronLeft className="w-5 h-5" />
                                 </Button>
@@ -255,24 +270,37 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                                         if (currentIndex < questions.length - 1) {
                                             setCurrentIndex(currentIndex + 1)
                                         } else {
-                                            setCurrentIndex(0) // Loop back to the first question
+                                            setCurrentIndex(0)
                                         }
                                     }}
                                     size="lg"
                                     className={cn(
-                                        "h-10 px-8 font-semibold rounded-lg text-black active:scale-95 transition-all duration-300 bg-yellow-400 hover:bg-yellow-500 shadow-lg shadow-yellow-500/20 hover:scale-105"
+                                        "h-9 md:h-10 px-4 md:px-8 font-semibold rounded-lg text-black active:scale-95 transition-all duration-300 bg-yellow-400 hover:bg-yellow-500 shadow-lg shadow-yellow-500/20 hover:scale-105 text-xs md:text-sm"
                                     )}
                                 >
-                                    SAVE & NEXT
-                                    <ChevronRight className="w-5 h-5 ml-2" />
+                                    <span className="hidden xs:inline">SAVE & </span>NEXT
+                                    <ChevronRight className="w-4 h-4 ml-1 md:ml-2" />
                                 </Button>
                             </div>
                         </div>
                     </footer>
                 </div>
 
+                {/* Mobile backdrop */}
+                {showPalette && (
+                    <div
+                        className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                        onClick={() => setShowPalette(false)}
+                    />
+                )}
+
                 {/* Right Sidebar: Palette */}
-                <div className="w-[380px] bg-background border-l border-border/50 flex flex-col z-50">
+                <div className={cn(
+                    "bg-background border-l border-border/50 flex flex-col z-50 transition-transform duration-300 ease-in-out",
+                    "fixed top-16 right-0 bottom-0 w-[320px]",
+                    "lg:relative lg:top-auto lg:bottom-auto lg:w-95 lg:translate-x-0",
+                    showPalette ? "translate-x-0" : "translate-x-full"
+                )}>
                     <div className="p-6 border-b border-border/50 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center border-2 border-blue-500 shadow-sm overflow-hidden">
                             <User className="w-8 h-8 text-blue-600 mt-2" />
