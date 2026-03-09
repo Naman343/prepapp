@@ -1,4 +1,4 @@
-import { IsString, IsInt, Min, IsNotEmpty } from 'class-validator';
+import { IsString, IsInt, IsOptional, Min, IsNotEmpty } from 'class-validator';
 
 export class CreateTestDto {
   @IsString()
@@ -12,4 +12,9 @@ export class CreateTestDto {
   @IsInt()
   @Min(1)
   totalQuestions: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(2000)
+  year?: number; // e.g. 2024
 }
