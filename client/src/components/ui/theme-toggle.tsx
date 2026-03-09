@@ -6,38 +6,56 @@ import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 
 export function ThemeToggle() {
-    const { setTheme, theme } = useTheme()
-    const isDark = theme === "dark"
+    const { setTheme, resolvedTheme } = useTheme()
+    const [mounted, setMounted] = React.useState(false)
+
+    React.useEffect(() => setMounted(true), [])
+
+    const isDark = resolvedTheme === "dark"
+
+    if (!mounted) {
+        return <div className="w-[52px] h-7 rounded-full bg-muted animate-pulse" />
+    }
 
     return (
         <button
             onClick={() => setTheme(isDark ? "light" : "dark")}
             aria-label="Toggle theme"
+            role="switch"
+            aria-checked={isDark}
             className={cn(
-                "relative ml-4 flex items-center w-16 h-8 rounded-full border-2 transition-all duration-300 focus:outline-none",
+                "relative flex items-center w-[52px] h-7 rounded-full p-0.5 transition-colors duration-500 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2",
                 isDark
-                    ? "bg-neutral-900 border-neutral-700"
-                    : "bg-neutral-100 border-neutral-300"
+                    ? "bg-gradient-to-r from-indigo-600 to-violet-600"
+                    : "bg-gradient-to-r from-amber-300 to-orange-300"
             )}
         >
-            {/* Track icons */}
-            <Moon className="absolute left-1.5 h-4 w-4 text-neutral-400" />
-            <Sun className="absolute right-1.5 h-4 w-4 text-neutral-400" />
-
-            {/* Sliding circle */}
+            {/* Sliding thumb */}
             <span
                 className={cn(
-                    "absolute top-0.5 flex items-center justify-center w-6 h-6 rounded-full shadow-md transition-all duration-300",
+                    "relative z-10 flex items-center justify-center w-6 h-6 rounded-full shadow-lg transition-all duration-500 ease-[cubic-bezier(0.68,-0.15,0.27,1.15)]",
                     isDark
-                        ? "left-0.5 bg-neutral-800"
-                        : "left-[calc(100%-1.75rem)] bg-white"
+                        ? "translate-x-[22px] bg-indigo-950"
+                        : "translate-x-0 bg-white"
                 )}
             >
-                {isDark
-                    ? <Moon className="h-3.5 w-3.5 text-white" />
-                    : <Sun className="h-3.5 w-3.5 text-neutral-800" />
-                }
+                <Sun className={cn(
+                    "absolute h-3.5 w-3.5 text-amber-500 transition-all duration-300",
+                    isDark ? "opacity-0 rotate-90 scale-0" : "opacity-100 rotate-0 scale-100"
+                )} />
+                <Moon className={cn(
+                    "absolute h-3.5 w-3.5 text-indigo-200 transition-all duration-300",
+                    isDark ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-90 scale-0"
+                )} />
             </span>
+
+            {/* Background glow effect */}
+            <span className={cn(
+                "absolute inset-0 rounded-full transition-opacity duration-500",
+                isDark
+                    ? "bg-[radial-gradient(circle_at_75%_50%,rgba(129,140,248,0.3),transparent_70%)]"
+                    : "bg-[radial-gradient(circle_at_25%_50%,rgba(251,191,36,0.4),transparent_70%)]"
+            )} />
         </button>
     )
 }

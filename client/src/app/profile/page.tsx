@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
@@ -6,7 +6,7 @@ import { Navbar } from "@/components/layout/Navbar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
-import { LogOut, Save, User } from "lucide-react"
+import { LogOut, Save, User, Pencil, X } from "lucide-react"
 import api from "@/lib/axios"
 
 type Category = "GEN" | "EWS" | "OBC" | "SC" | "ST"
@@ -36,6 +36,7 @@ export default function ProfilePage() {
     const [form, setForm] = useState<Partial<UserData>>({})
     const [saving, setSaving] = useState(false)
     const [saved, setSaved] = useState(false)
+    const [editing, setEditing] = useState(false)
     const router = useRouter()
 
     useEffect(() => {
@@ -66,10 +67,23 @@ export default function ProfilePage() {
             const res = await api.patch("/auth/profile", form)
             setUser(prev => ({ ...prev!, ...res.data }))
             setSaved(true)
+            setEditing(false)
             setTimeout(() => setSaved(false), 2000)
         } finally {
             setSaving(false)
         }
+    }
+
+    const handleCancelEdit = () => {
+        setForm({
+            name: user?.name ?? "",
+            mobileNumber: user?.mobileNumber ?? "",
+            dob: user?.dob ? user.dob.slice(0, 10) : "",
+            location: user?.location ?? "",
+            category: user?.category,
+            pwd: user?.pwd ?? false,
+        })
+        setEditing(false)
     }
 
     const set = (field: keyof UserData, value: string | boolean | undefined) =>
@@ -98,18 +112,32 @@ export default function ProfilePage() {
                     {/* Left â€” Profile form */}
                     <Card className="lg:col-span-2 rounded-2xl border-border/60">
                         <CardHeader className="pb-4">
-                            {/* Avatar + tier badge */}
-                            <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-xl font-black shadow-lg">
-                                    {initials}
+                            {/* Avatar + tier badge + Edit button */}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white text-xl font-black shadow-lg">
+                                        {initials}
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-lg leading-tight">{user.name || "Set your name"}</p>
+                                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                                        <span className={`mt-1 inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${TIER_STYLES[tier]}`}>
+                                            {tier}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="font-black text-lg leading-tight">{user.name || "Set your name"}</p>
-                                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                                    <span className={`mt-1 inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${TIER_STYLES[tier]}`}>
-                                        {tier}
-                                    </span>
-                                </div>
+                                <Button
+                                    variant={editing ? "outline" : "default"}
+                                    size="sm"
+                                    onClick={() => editing ? handleCancelEdit() : setEditing(true)}
+                                    className={`rounded-xl font-black text-xs uppercase tracking-wider gap-2 ${
+                                        editing
+                                            ? "border-2 border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400"
+                                            : "bg-blue-600 text-white hover:bg-blue-700"
+                                    }`}
+                                >
+                                    {editing ? <><X className="w-3.5 h-3.5" /> Cancel</> : <><Pencil className="w-3.5 h-3.5" /> Edit</>}
+                                </Button>
                             </div>
                         </CardHeader>
 
@@ -121,7 +149,8 @@ export default function ProfilePage() {
                                     value={form.name ?? ""}
                                     onChange={e => set("name", e.target.value)}
                                     placeholder="Enter your full name"
-                                    className={inputCls}
+                                    readOnly={!editing}
+                                    className={`${inputCls} ${!editing ? "opacity-60 cursor-not-allowed" : ""}`}
                                 />
                             </Field>
 
@@ -141,9 +170,15 @@ export default function ProfilePage() {
                                     <input
                                         type="tel"
                                         value={form.mobileNumber ?? ""}
-                                        onChange={e => set("mobileNumber", e.target.value)}
-                                        placeholder="+91 00000 00000"
-                                        className={inputCls}
+                                        onChange={e => {
+                                            const digits = e.target.value.replace(/\D/g, "").slice(0, 10)
+                                            set("mobileNumber", digits)
+                                        }}
+                                        maxLength={10}
+                                        pattern="[0-9]{10}"
+                                        placeholder="0000000000"
+                                        readOnly={!editing}
+                                        className={`${inputCls} ${!editing ? "opacity-60 cursor-not-allowed" : ""}`}
                                     />
                                 </Field>
                                 <Field label="Date of Birth">
@@ -151,7 +186,8 @@ export default function ProfilePage() {
                                         type="date"
                                         value={form.dob ?? ""}
                                         onChange={e => set("dob", e.target.value)}
-                                        className={inputCls}
+                                        readOnly={!editing}
+                                        className={`${inputCls} ${!editing ? "opacity-60 cursor-not-allowed" : ""}`}
                                     />
                                 </Field>
                             </div>
@@ -163,7 +199,8 @@ export default function ProfilePage() {
                                     value={form.location ?? ""}
                                     onChange={e => set("location", e.target.value)}
                                     placeholder="City, State"
-                                    className={inputCls}
+                                    readOnly={!editing}
+                                    className={`${inputCls} ${!editing ? "opacity-60 cursor-not-allowed" : ""}`}
                                 />
                             </Field>
 
@@ -174,12 +211,13 @@ export default function ProfilePage() {
                                         <button
                                             key={cat}
                                             type="button"
-                                            onClick={() => set("category", cat)}
+                                            onClick={() => editing && set("category", cat)}
+                                            disabled={!editing}
                                             className={`px-4 py-1.5 rounded-lg text-xs font-black border-2 transition-all ${
                                                 form.category === cat
                                                     ? "border-blue-600 bg-blue-600 text-white"
                                                     : "border-border bg-background text-muted-foreground hover:border-blue-400"
-                                            }`}
+                                            } ${!editing ? "opacity-60 cursor-not-allowed" : ""}`}
                                         >
                                             {cat}
                                         </button>
@@ -194,12 +232,13 @@ export default function ProfilePage() {
                                         <button
                                             key={String(val)}
                                             type="button"
-                                            onClick={() => set("pwd", val)}
+                                            onClick={() => editing && set("pwd", val)}
+                                            disabled={!editing}
                                             className={`px-6 py-1.5 rounded-lg text-xs font-black border-2 transition-all ${
                                                 form.pwd === val
                                                     ? "border-blue-600 bg-blue-600 text-white"
                                                     : "border-border bg-background text-muted-foreground hover:border-blue-400"
-                                            }`}
+                                            } ${!editing ? "opacity-60 cursor-not-allowed" : ""}`}
                                         >
                                             {val ? "Yes" : "No"}
                                         </button>
@@ -207,14 +246,19 @@ export default function ProfilePage() {
                                 </div>
                             </Field>
 
-                            {/* Save button */}
-                            <Button
-                                onClick={handleSave}
-                                disabled={saving}
-                                className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 font-black rounded-xl mt-2"
-                            >
-                                {saved ? "Saved ✓" : saving ? "Saving..." : <><Save className="w-4 h-4 mr-2" />Save Changes</>}
-                            </Button>
+                            {/* Save button - only visible in edit mode */}
+                            {editing && (
+                                <Button
+                                    onClick={handleSave}
+                                    disabled={saving}
+                                    className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 font-black rounded-xl mt-2"
+                                >
+                                    {saving ? "Saving..." : <><Save className="w-4 h-4 mr-2" />Save Changes</>}
+                                </Button>
+                            )}
+                            {saved && !editing && (
+                                <p className="text-center text-sm font-bold text-green-600 mt-2">Saved ✓</p>
+                            )}
                         </CardContent>
                     </Card>
 
