@@ -213,7 +213,7 @@ export default function ProfilePage() {
                                 disabled={saving}
                                 className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 font-black rounded-xl mt-2"
                             >
-                                {saved ? "Saved âœ“" : saving ? "Saving..." : <><Save className="w-4 h-4 mr-2" />Save Changes</>}
+                                {saved ? "Saved ✓" : saving ? "Saving..." : <><Save className="w-4 h-4 mr-2" />Save Changes</>}
                             </Button>
                         </CardContent>
                     </Card>
