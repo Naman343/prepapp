@@ -15,11 +15,19 @@ CREATE TYPE "MemberTier" AS ENUM ('FREE', 'PRO', 'MAX');
 ALTER TABLE "User" ADD COLUMN     "category" "Category",
 ADD COLUMN     "dob" TIMESTAMP(3),
 ADD COLUMN     "location" TEXT,
-ADD COLUMN     "memberId" TEXT NOT NULL,
+ADD COLUMN     "memberId" TEXT,
 ADD COLUMN     "memberTier" "MemberTier" NOT NULL DEFAULT 'FREE',
 ADD COLUMN     "mobileNumber" TEXT,
 ADD COLUMN     "name" TEXT,
 ADD COLUMN     "pwd" BOOLEAN;
 
+-- Backfill memberId for existing rows that have no value
+UPDATE "User" SET "memberId" = substr(md5(random()::text || id), 1, 12) WHERE "memberId" IS NULL;
+
+-- Now enforce NOT NULL and unique
+ALTER TABLE "User" ALTER COLUMN "memberId" SET NOT NULL;
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_memberId_key" ON "User"("memberId");
+
+
