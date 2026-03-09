@@ -41,6 +41,7 @@ async function main() {
             title: 'UPSC Prelims 2023 - GS Paper 1 (Sample)',
             duration: 120, // 2 hours
             totalQuestions: 10, // Small sample for now
+            year: 2023,
             isPublished: true,
         }
     })

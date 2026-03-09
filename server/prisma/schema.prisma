@@ -60,11 +60,17 @@ model Subject {
 }
 
 model Topic {
-  id        String     @id @default(uuid())
-  name      String
-  subjectId String
-  subject   Subject    @relation(fields: [subjectId], references: [id])
-  questions Question[]
+  id            String     @id @default(uuid())
+  name          String
+  subjectId     String
+  subject       Subject    @relation(fields: [subjectId], references: [id])
+
+  // Self-relation for sub-topics (e.g. History → Non-Cooperation Movement)
+  parentTopicId String?
+  parentTopic   Topic?     @relation("SubTopics", fields: [parentTopicId], references: [id])
+  subTopics     Topic[]    @relation("SubTopics")
+
+  questions     Question[]
 }
 
 model Question {
@@ -97,12 +103,14 @@ model Option {
 }
 
 model Test {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   title          String
-  duration       Int      // in minutes
+  duration       Int       // in minutes
   totalQuestions Int
-  isPublished    Boolean  @default(false)
-  createdAt      DateTime @default(now())
+  year           Int?      // e.g. 2024 for UPSC Prelims 2024
+  date           DateTime? // exact exam date e.g. 2024-05-26
+  isPublished    Boolean   @default(false)
+  createdAt      DateTime  @default(now())
   
   questions      Question[] @relation("TestQuestions")
   
