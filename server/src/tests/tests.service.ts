@@ -13,10 +13,18 @@ export class TestsService {
   }
 
   findAll() {
-    // Only return published tests for normal users?
-    // For now, return all or filter by query param later.
     return this.prisma.test.findMany({
-      orderBy: { createdAt: 'desc' },
+      where: { isPublished: true },
+      select: {
+        id: true,
+        title: true,
+        duration: true,
+        totalQuestions: true,
+        isPublished: true,
+        year: true,
+        date: true,
+      },
+      orderBy: [{ year: 'desc' }, { createdAt: 'desc' }],
     });
   }
 

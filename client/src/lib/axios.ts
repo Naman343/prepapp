@@ -10,7 +10,6 @@ const api = axios.create({
 // Add a request interceptor to include the JWT token
 api.interceptors.request.use(
     (config) => {
-        // We will store token in localStorage for MVP
         if (typeof window !== 'undefined') {
             const token = localStorage.getItem('token');
             if (token) {
@@ -19,7 +18,18 @@ api.interceptors.request.use(
         }
         return config;
     },
+    (error) => Promise.reject(error)
+);
+
+// Auto-logout on 401 (stale/invalid token)
+api.interceptors.response.use(
+    (response) => response,
     (error) => {
+        if (typeof window !== 'undefined' && error?.response?.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/auth/login';
+        }
         return Promise.reject(error);
     }
 );

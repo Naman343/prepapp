@@ -106,8 +106,8 @@ export function Navbar() {
                     <div className="flex items-center gap-6">
                         {user && (
                             <nav className="hidden lg:flex items-center gap-8 text-[10px] uppercase font-bold tracking-[0.15em] text-muted-foreground mr-4">
-                                <Link href="/pyq" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">PYQ Tests</Link>
-                                <Link href="/tests" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">Mock Tests</Link>
+                                <Link href="/tests?tab=pyq" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">PYQ Tests</Link>
+                                <Link href="/tests?tab=mock" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">Mock Tests</Link>
                                 <Link href="/analytics" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">My Performance</Link>
                                 <button
                                     className="hover:text-blue-600 transition-colors py-2"

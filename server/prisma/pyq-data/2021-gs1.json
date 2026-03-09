@@ -1,0 +1,132 @@
+{
+  "test": {
+    "title": "UPSC Prelims 2021 — GS Paper 1",
+    "year": 2021,
+    "date": "2021-06-10",
+    "duration": 120,
+    "totalQuestions": 100,
+    "isPublished": true
+  },
+  "questions": [
+    {
+      "text": "Consider the following statements:\n1. In India, the Himalayan Rivers are snow-fed and rain-fed, while the Peninsular rivers are rain-fed only.\n2. In India, the Luni is the only river that flows into the Arabian Sea without forming a delta.\nWhich of the statements given above is/are correct?",
+      "difficulty": "MEDIUM",
+      "topic": "Geography",
+      "explanation": "Statement 1 is correct — Himalayan rivers are perennial (snow+rain fed), Peninsular rivers are seasonal (rain-fed). Statement 2 is incorrect — the Luni flows into the Rann of Kutch, not directly into the Arabian Sea.",
+      "options": [
+        { "text": "1 only", "isCorrect": true },
+        { "text": "2 only", "isCorrect": false },
+        { "text": "Both 1 and 2", "isCorrect": false },
+        { "text": "Neither 1 nor 2", "isCorrect": false }
+      ]
+    },
+    {
+      "text": "With reference to the history of India, the terms 'Kulyavapa' and 'Dronavapa' denote:",
+      "difficulty": "HARD",
+      "topic": "History",
+      "explanation": "These terms are ancient Indian land measurement units. Kulyavapa and Dronavapa are measures of land area used during the Gupta period.",
+      "options": [
+        { "text": "Measures of land area", "isCorrect": true },
+        { "text": "Positions in the royal court", "isCorrect": false },
+        { "text": "Agricultural implements", "isCorrect": false },
+        { "text": "Irrigation techniques", "isCorrect": false }
+      ]
+    },
+    {
+      "text": "With reference to the Mughal period of Indian history, which of the following statements is/are correct?\n1. Diwani rights were first granted to the East India Company during the reign of Shah Alam II.\n2. The zamindars of the Mughal period were the revenue farmers and rent collectors.\nSelect the correct answer using the code given below:",
+      "difficulty": "MEDIUM",
+      "topic": "History",
+      "explanation": "Statement 1 is correct — Diwani rights (right to collect revenue from Bengal, Bihar, Orissa) were granted to EIC by Shah Alam II in 1765. Statement 2 is broadly correct but zamindars had hereditary rights, not just revenue farming.",
+      "options": [
+        { "text": "1 only", "isCorrect": false },
+        { "text": "2 only", "isCorrect": false },
+        { "text": "Both 1 and 2", "isCorrect": true },
+        { "text": "Neither 1 nor 2", "isCorrect": false }
+      ]
+    },
+    {
+      "text": "In India, the 'Scheduled Tribes' are formally identified by which authority?",
+      "difficulty": "EASY",
+      "topic": "Polity",
+      "explanation": "Scheduled Tribes are identified/notified by the President under Article 342 of the Constitution on the advice of the concerned state government.",
+      "options": [
+        { "text": "Ministry of Tribal Affairs", "isCorrect": false },
+        { "text": "National Commission for Scheduled Tribes", "isCorrect": false },
+        { "text": "The President", "isCorrect": true },
+        { "text": "State Governments", "isCorrect": false }
+      ]
+    },
+    {
+      "text": "With reference to India's historical trade with the Roman world, consider the following ports:\n1. Barbaricum\n2. Barygaza\n3. Poduke/Pondicherry\n4. Sopatma\nWhich of the above were famous ports for the import of Roman gold?",
+      "difficulty": "HARD",
+      "topic": "History",
+      "explanation": "Barbaricum (Sindh), Barygaza (Bharuch), and Poduke were key ports through which Roman gold and goods entered India.",
+      "options": [
+        { "text": "1 and 2 only", "isCorrect": false },
+        { "text": "1, 2 and 3 only", "isCorrect": false },
+        { "text": "2, 3 and 4 only", "isCorrect": false },
+        { "text": "1, 2, 3 and 4", "isCorrect": true }
+      ]
+    },
+    {
+      "text": "Consider the following pairs:\nCraftsmen famous for → Region/Country\n1. Kutchi embroidery → Gujarat\n2. Phulkari → Punjab\n3. Bidri inlay → Karnataka\nWhich of the above pairs is/are correctly matched?",
+      "difficulty": "EASY",
+      "topic": "Art & Culture",
+      "explanation": "All three are correctly matched. Kutchi embroidery is from Gujarat, Phulkari is the traditional embroidery of Punjab, and Bidri inlay work is from Bidar, Karnataka.",
+      "options": [
+        { "text": "1 and 2 only", "isCorrect": false },
+        { "text": "2 and 3 only", "isCorrect": false },
+        { "text": "1 and 3 only", "isCorrect": false },
+        { "text": "1, 2 and 3", "isCorrect": true }
+      ]
+    },
+    {
+      "text": "With reference to 'National Investment and Infrastructure Fund (NIIF)', which of the following statements is/are correct?\n1. It is a fund created to provide long-term capital to the infrastructure sector.\n2. It is a fund that manages assets of Central Public Sector Enterprises (CPSEs).\nSelect the correct answer:",
+      "difficulty": "MEDIUM",
+      "topic": "Economy",
+      "explanation": "NIIF was set up in 2015 to catalyze investment in infrastructure. Statement 1 is correct. Statement 2 is incorrect — NIIF does not manage CPSE assets; it mobilizes equity capital for infrastructure.",
+      "options": [
+        { "text": "1 only", "isCorrect": true },
+        { "text": "2 only", "isCorrect": false },
+        { "text": "Both 1 and 2", "isCorrect": false },
+        { "text": "Neither 1 nor 2", "isCorrect": false }
+      ]
+    },
+    {
+      "text": "With reference to the 'Prohibition of Benami Property Transactions Act, 1988', which of the following statements is/are correct?\n1. Property in the name of a spouse purchased from known sources of income is not a benami transaction.\n2. The Act has not been extended to Jammu and Kashmir.\nSelect the correct answer:",
+      "difficulty": "MEDIUM",
+      "topic": "Polity",
+      "explanation": "Statement 1 is correct — property purchased in a spouse or child's name from known income sources is excluded. Statement 2 is incorrect — the Benami Transactions (Prohibition) Amendment Act 2016 applies across India.",
+      "options": [
+        { "text": "1 only", "isCorrect": true },
+        { "text": "2 only", "isCorrect": false },
+        { "text": "Both 1 and 2", "isCorrect": false },
+        { "text": "Neither 1 nor 2", "isCorrect": false }
+      ]
+    },
+    {
+      "text": "Which one of the following National Parks has a climate that varies from tropical to subtropical, temperate and arctic?",
+      "difficulty": "MEDIUM",
+      "topic": "Environment",
+      "explanation": "Khangchendzonga National Park (Sikkim), a UNESCO World Heritage Site, spans a dramatic altitudinal range giving it all climate zones from subtropical to arctic.",
+      "options": [
+        { "text": "Khangchendzonga National Park", "isCorrect": true },
+        { "text": "Namdapha National Park", "isCorrect": false },
+        { "text": "Neora Valley National Park", "isCorrect": false },
+        { "text": "Nokrek National Park", "isCorrect": false }
+      ]
+    },
+    {
+      "text": "With reference to 'Atal Innovation Mission', which of the following statements is/are correct?\n1. Its primary objective is to develop a network of Atal Tinkering Labs in NITI Aayog.\n2. It has set up Atal Incubation Centres to foster world-class startups.\nSelect the correct answer:",
+      "difficulty": "EASY",
+      "topic": "Science & Technology",
+      "explanation": "Both statements are correct. Atal Innovation Mission operates under NITI Aayog and runs ATL (Atal Tinkering Labs) in schools and Atal Incubation Centres for startups.",
+      "options": [
+        { "text": "1 only", "isCorrect": false },
+        { "text": "2 only", "isCorrect": false },
+        { "text": "Both 1 and 2", "isCorrect": true },
+        { "text": "Neither 1 nor 2", "isCorrect": false }
+      ]
+    }
+  ]
+}
