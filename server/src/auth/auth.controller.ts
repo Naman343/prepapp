@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request as Req } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Body, UseGuards, Request as Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
@@ -24,10 +24,22 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   async me(@Req() req: Request & { user?: { userId: string; email: string; role: string } }) {
-    return {
-      id: req.user!.userId,
-      email: req.user!.email,
-      role: req.user!.role,
-    };
+    return this.authService.getProfile(req.user!.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('profile')
+  async updateProfile(
+    @Req() req: Request & { user?: { userId: string } },
+    @Body() body: {
+      name?: string;
+      mobileNumber?: string;
+      dob?: string;
+      location?: string;
+      category?: 'GEN' | 'EWS' | 'OBC' | 'SC' | 'ST';
+      pwd?: boolean;
+    },
+  ) {
+    return this.authService.updateProfile(req.user!.userId, body);
   }
 }

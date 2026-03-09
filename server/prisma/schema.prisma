@@ -21,13 +21,35 @@ enum Difficulty {
   HARD
 }
 
+enum Category {
+  GEN
+  EWS
+  OBC
+  SC
+  ST
+}
+
+enum MemberTier {
+  FREE
+  PRO
+  MAX
+}
+
 model User {
-  id            String    @id @default(uuid())
-  email         String    @unique
+  id            String      @id @default(uuid())
+  email         String      @unique
   passwordHash  String
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  
+  role          Role        @default(USER)
+  name          String?
+  mobileNumber  String?
+  dob           DateTime?
+  location      String?
+  category      Category?
+  pwd           Boolean?
+  memberTier    MemberTier  @default(FREE)
+  memberId      String      @unique
+  createdAt     DateTime    @default(now())
+
   testAttempts  TestAttempt[]
 }
 
