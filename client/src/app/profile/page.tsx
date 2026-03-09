@@ -1,9 +1,12 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/layout/Navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { User, Mail, Shield } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import { User, Mail, Shield, LogOut } from "lucide-react"
 
 interface UserData {
     id: string;
@@ -14,6 +17,13 @@ interface UserData {
 
 export default function ProfilePage() {
     const [user, setUser] = useState<UserData | null>(null)
+    const router = useRouter()
+
+    const handleLogout = () => {
+        localStorage.removeItem("token")
+        localStorage.removeItem("user")
+        router.push("/auth/login")
+    }
 
     useEffect(() => {
         const userData = localStorage.getItem("user")
@@ -83,8 +93,20 @@ export default function ProfilePage() {
                         <CardHeader>
                             <CardTitle className="text-lg">Quick Actions</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-2">
-                            <p className="text-sm text-muted-foreground">
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between p-3 border rounded-lg">
+                                <span className="text-sm font-medium">Theme</span>
+                                <ThemeToggle />
+                            </div>
+                            <Button
+                                variant="outline"
+                                className="w-full flex items-center gap-2 text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 hover:border-red-400 transition-colors"
+                                onClick={handleLogout}
+                            >
+                                <LogOut className="w-4 h-4" />
+                                Logout
+                            </Button>
+                            <p className="text-xs text-muted-foreground">
                                 Change Password functionality coming soon.
                             </p>
                         </CardContent>
