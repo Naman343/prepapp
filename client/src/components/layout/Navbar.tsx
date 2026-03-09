@@ -16,6 +16,7 @@ export function Navbar() {
     const [user, setUser] = useState<UserData | null>(null)
     const [searchOpen, setSearchOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
+    const [debouncedQuery, setDebouncedQuery] = useState("")
     const inputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
@@ -32,9 +33,15 @@ export function Navbar() {
         } else {
             document.body.style.overflow = ""
             setSearchQuery("")
+            setDebouncedQuery("")
         }
         return () => { document.body.style.overflow = "" }
     }, [searchOpen])
+
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300)
+        return () => clearTimeout(timer)
+    }, [searchQuery])
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -84,7 +91,7 @@ export function Navbar() {
 
                         {/* Results area */}
                         <div className="px-6 pb-6 min-h-50 text-sm text-zinc-400 dark:text-zinc-500 flex items-center justify-center">
-                            {searchQuery ? `Searching for "${searchQuery}"...` : "Start typing to search"}
+                            {debouncedQuery ? `Searching for "${debouncedQuery}"...` : "Start typing to search"}
                         </div>
                     </div>
                 </div>
