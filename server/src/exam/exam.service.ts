@@ -206,6 +206,8 @@ export class ExamService {
       questions: sanitizedQuestions,
       startTime: attempt.startTime,
       duration: attempt.test.duration,
+      testTitle: attempt.test.title,
+      totalQuestions: attempt.test.totalQuestions,
     };
   }
 
