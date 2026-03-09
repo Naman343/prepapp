@@ -90,8 +90,8 @@ export default function Home() {
             </div>
           </div>
         ) : (
-          <div className="container mx-auto px-6 py-12 max-w-7xl animate-in fade-in duration-500">
-            <header className="mb-12">
+          <div className="container mx-auto px-6 py-6 max-w-7xl animate-in fade-in duration-500">
+            <header className="mb-8">
               <h2 className="text-[10px] uppercase font-bold text-blue-600 tracking-[0.3em] mb-2">DASHBOARD</h2>
               <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
                 Welcome back, {user.email?.split('@')[0]}
