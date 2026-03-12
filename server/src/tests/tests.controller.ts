@@ -6,9 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request as Req,
 } from '@nestjs/common';
 import { TestsService } from './tests.service';
 import { CreateTestDto } from './dto/create-test.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 
 @Controller('tests')
 export class TestsController {
@@ -17,6 +21,12 @@ export class TestsController {
   @Post()
   create(@Body() createTestDto: CreateTestDto) {
     return this.testsService.create(createTestDto);
+  }
+
+  @Get('status')
+  @UseGuards(AuthGuard('jwt'))
+  findAllWithStatus(@Req() req: Request & { user?: { userId: string } }) {
+    return this.testsService.findAllWithStatus(req.user!.userId);
   }
 
   @Get()

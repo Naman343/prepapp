@@ -16,6 +16,9 @@ interface Test {
     year: number | null
     date: string | null
     createdAt?: string
+    status?: string
+    lastAttemptId?: string
+    score?: number
 }
 
 export function TestSlider() {
@@ -31,8 +34,10 @@ export function TestSlider() {
 
     const fetchTests = async () => {
         try {
-            const res = await api.get("/tests")
-            // Fetch all tests and sort by createdAt (if available) or just take the first few
+            const token = localStorage.getItem("token")
+            const res = token 
+                ? await api.get("/tests/status")
+                : await api.get("/tests")
             setTests(res.data)
         } catch (error) {
             console.error("Failed to fetch tests for slider", error)
@@ -120,11 +125,13 @@ export function TestSlider() {
                                     <div className="flex justify-between items-center mb-5">
                                         <div className={cn(
                                             "px-2 py-1 rounded-lg text-[8px] font-black uppercase tracking-[0.12em] border transition-all duration-300 shadow-sm",
-                                            test.year 
-                                                ? "bg-red-50 text-red-600 border-red-100 group-hover/card:bg-red-600 group-hover/card:text-white group-hover/card:border-red-600" 
-                                                : "bg-zinc-100 border-zinc-200 text-zinc-600 group-hover/card:bg-black group-hover/card:text-white group-hover/card:border-black"
+                                            test.status === "COMPLETED"
+                                                ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                                                : test.year 
+                                                    ? "bg-red-50 text-red-600 border-red-100 group-hover/card:bg-red-600 group-hover/card:text-white group-hover/card:border-red-600" 
+                                                    : "bg-zinc-100 border-zinc-200 text-zinc-600 group-hover/card:bg-black group-hover/card:text-white group-hover/card:border-black"
                                         )}>
-                                            {test.year ? `UPSC ${test.year}` : "New Mock"}
+                                            {test.status === "COMPLETED" ? "Done" : (test.year ? `UPSC ${test.year}` : "New Mock")}
                                         </div>
                                         <div className="flex items-center gap-1.5 px-2 py-1 bg-red-50 rounded-lg border border-red-100 text-red-600 group-hover/card:bg-red-600 group-hover/card:text-white group-hover/card:border-red-600 transition-all duration-300">
                                             <Clock className="w-3 h-3" />
@@ -151,15 +158,26 @@ export function TestSlider() {
                                 </div>
 
                                 <button
-                                    onClick={() => handleStartTest(test.id)}
+                                    onClick={() => {
+                                        if (test.status === "COMPLETED") {
+                                            router.push(`/results/${test.lastAttemptId}`)
+                                        } else {
+                                            handleStartTest(test.id)
+                                        }
+                                    }}
                                     disabled={!!starting}
-                                    className="relative overflow-hidden w-full h-11 bg-zinc-900 text-white rounded-xl flex items-center justify-center gap-2 font-black text-[9px] uppercase tracking-widest transition-all duration-300 hover:bg-zinc-800 hover:shadow-lg hover:shadow-black/10 active:scale-[0.97]"
+                                    className={cn(
+                                        "relative overflow-hidden w-full h-11 text-white rounded-xl flex items-center justify-center gap-2 font-black text-[9px] uppercase tracking-widest transition-all duration-300 hover:shadow-lg active:scale-[0.97]",
+                                        test.status === "COMPLETED"
+                                            ? "bg-blue-600 hover:bg-blue-700 hover:shadow-blue-500/20"
+                                            : "bg-zinc-900 hover:bg-zinc-800 hover:shadow-black/10"
+                                    )}
                                 >
                                     {starting === test.id ? (
                                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     ) : (
                                         <>
-                                            <span>Take Test</span>
+                                            <span>{test.status === "COMPLETED" ? "Analyze Result" : "Take Test"}</span>
                                             <ArrowRight className="w-3.5 h-3.5 group-hover/card:translate-x-1 transition-transform duration-300" />
                                         </>
                                     )}
