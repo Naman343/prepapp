@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, BookOpen, BarChart3, TrendingUp, ShieldCheck, Zap } from "lucide-react"
 import api from "@/lib/axios"
+import { TestSlider } from "@/components/dashboard/TestSlider"
 
 interface UserData {
   id: string;
@@ -91,13 +92,15 @@ export default function Home() {
           </div>
         ) : (
           <div className="container mx-auto px-6 py-6 max-w-7xl animate-in fade-in duration-500">
-            <header className="mb-8">
-              <h2 className="text-[10px] uppercase font-bold text-blue-600 tracking-[0.3em] mb-2">DASHBOARD</h2>
-              <h1 className="text-4xl font-black tracking-tight flex items-center gap-3">
+            <header className="mb-10">
+              <h2 className="text-[10px] uppercase font-bold text-blue-600 tracking-[0.3em] mb-2 px-1">DASHBOARD</h2>
+              <h1 className="text-4xl md:text-5xl font-black tracking-tight flex items-center gap-3">
                 Welcome back, {user.email?.split('@')[0]}
-                <span className="text-blue-500">👋</span>
+                <span className="text-blue-500 animate-bounce-subtle">👋</span>
               </h1>
             </header>
+
+            <TestSlider />
 
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               <Card className="group relative overflow-hidden bg-background border-2 border-border/50 hover:border-foreground transition-all duration-300 rounded-4xl p-4 shadow-sm hover:shadow-xl hover:shadow-foreground/5">
