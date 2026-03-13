@@ -63,12 +63,13 @@ export default function AdminDashboard() {
 
       <div className="rounded-xl border border-border bg-card p-5">
         <h3 className="font-semibold mb-3">Quick Actions</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {[
             { label: "Add Question", href: "/admin/questions" },
             { label: "Create Test", href: "/admin/tests" },
             { label: "Add Subject/Topic", href: "/admin/subjects" },
             { label: "Bulk Import JSON", href: "/admin/import" },
+            { label: "Open PDF Extractor UI", href: "/admin/pdf-extractor" },
           ].map(({ label, href }) => (
             <a
               key={href}

@@ -23,6 +23,14 @@ interface ImportPayload {
   }[]
 }
 
+interface PdfExtractResponse {
+  success: boolean
+  pages?: number
+  provider?: string
+  model?: string
+  data: unknown
+}
+
 function validate(data: unknown): { ok: true; payload: ImportPayload } | { ok: false; error: string } {
   if (typeof data !== "object" || !data) return { ok: false, error: "JSON must be an object" }
   const d = data as Record<string, unknown>
@@ -78,7 +86,21 @@ export default function ImportPage() {
   const [parseError, setParseError] = useState("")
   const [status, setStatus] = useState<"idle" | "importing" | "success" | "error">("idle")
   const [resultMsg, setResultMsg] = useState("")
+
+  const [pdfFile, setPdfFile] = useState<File | null>(null)
+  const [extracting, setExtracting] = useState(false)
+  const [extractError, setExtractError] = useState("")
+  const [extractMeta, setExtractMeta] = useState<{ pages?: number; provider?: string; model?: string } | null>(null)
+  const [provider, setProvider] = useState<"groq" | "huggingface">("groq")
+  const [focusMode, setFocusMode] = useState<"balanced" | "focused" | "exhaustive">("balanced")
+  const [chunkMode, setChunkMode] = useState<"auto" | "page" | "numbered" | "window">("auto")
+  const [modelName, setModelName] = useState("")
+  const [instructions, setInstructions] = useState(
+    "Extract one UPSC test with all MCQs. Return JSON in import schema with test + questions + options."
+  )
+
   const fileRef = useRef<HTMLInputElement>(null)
+  const pdfRef = useRef<HTMLInputElement>(null)
 
   const handleParse = () => {
     setParseError("")
@@ -112,6 +134,61 @@ export default function ImportPage() {
       setStatus("idle")
     }
     reader.readAsText(file)
+  }
+
+  const handlePdfFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPdfFile(file)
+    setExtractError("")
+    setExtractMeta(null)
+  }
+
+  const handleExtractFromPdf = async () => {
+    if (!pdfFile) {
+      setExtractError("Select a PDF file first")
+      return
+    }
+
+    setExtracting(true)
+    setExtractError("")
+    setExtractMeta(null)
+    setStatus("idle")
+
+    try {
+      const formData = new FormData()
+      formData.append("pdf_file", pdfFile)
+      formData.append("provider", provider)
+      formData.append("focus_mode", focusMode)
+      formData.append("chunk_mode", chunkMode)
+      if (modelName.trim()) formData.append("model", modelName.trim())
+      if (instructions.trim()) formData.append("instructions", instructions.trim())
+
+      const response = await api.post<PdfExtractResponse>("/admin/import/extract-pdf", formData)
+      const extracted = response.data?.data
+      const meta = {
+        pages: response.data?.pages,
+        provider: response.data?.provider,
+        model: response.data?.model,
+      }
+
+      setExtractMeta(meta)
+      setJsonText(JSON.stringify(extracted, null, 2))
+
+      const validationResult = validate(extracted)
+      if (!validationResult.ok) {
+        setParsed(null)
+        setParseError(`Extraction succeeded, but JSON format is not import-ready: ${validationResult.error}`)
+      } else {
+        setParsed(validationResult.payload)
+        setParseError("")
+      }
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } }
+      setExtractError(e.response?.data?.message || "PDF extraction failed")
+    } finally {
+      setExtracting(false)
+    }
   }
 
   const handleImport = async () => {
@@ -171,6 +248,102 @@ export default function ImportPage() {
       )}
 
       {/* Input area */}
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <h3 className="font-semibold flex-1">Extract From PDF</h3>
+          <input
+            ref={pdfRef}
+            type="file"
+            accept=".pdf,application/pdf"
+            className="hidden"
+            onChange={handlePdfFile}
+          />
+          <Button variant="outline" size="sm" onClick={() => pdfRef.current?.click()}>
+            <Upload className="w-4 h-4 mr-1" /> Select PDF
+          </Button>
+        </div>
+
+        <div className="text-sm text-muted-foreground">
+          {pdfFile ? `Selected: ${pdfFile.name}` : "No PDF selected"}
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Provider</label>
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={provider}
+              onChange={(e) => setProvider(e.target.value as "groq" | "huggingface")}
+            >
+              <option value="groq">Groq</option>
+              <option value="huggingface">Hugging Face</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Focus Mode</label>
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={focusMode}
+              onChange={(e) => setFocusMode(e.target.value as "balanced" | "focused" | "exhaustive")}
+            >
+              <option value="balanced">Balanced</option>
+              <option value="focused">Focused</option>
+              <option value="exhaustive">Exhaustive</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Chunk Mode</label>
+            <select
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={chunkMode}
+              onChange={(e) => setChunkMode(e.target.value as "auto" | "page" | "numbered" | "window")}
+            >
+              <option value="auto">Auto</option>
+              <option value="page">Page</option>
+              <option value="numbered">Numbered</option>
+              <option value="window">Window</option>
+            </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground">Model Override (optional)</label>
+            <input
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              placeholder="e.g. moonshotai/kimi-k2-instruct-0905"
+              value={modelName}
+              onChange={(e) => setModelName(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-xs text-muted-foreground">Extraction Instructions</label>
+          <textarea
+            className="w-full min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+          />
+        </div>
+
+        {extractMeta && (
+          <p className="text-xs text-muted-foreground">
+            Extracted {extractMeta.pages ?? "?"} page(s) via {extractMeta.provider ?? "-"}
+            {extractMeta.model ? ` (${extractMeta.model})` : ""}
+          </p>
+        )}
+
+        {extractError && (
+          <p className="text-red-500 text-sm flex items-center gap-1.5">
+            <AlertCircle className="w-4 h-4" /> {extractError}
+          </p>
+        )}
+
+        <div className="flex justify-end">
+          <Button onClick={handleExtractFromPdf} disabled={!pdfFile || extracting}>
+            {extracting ? "Extracting..." : "Extract JSON From PDF"}
+          </Button>
+        </div>
+      </div>
+
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
         <div className="flex items-center gap-3">
           <h3 className="font-semibold flex-1">JSON Input</h3>

@@ -1,10 +1,163 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Difficulty } from '@prisma/client';
+
+type PdfExtractionOptions = {
+  instructions?: string;
+  provider?: string;
+  model?: string;
+  focusMode?: 'balanced' | 'focused' | 'exhaustive';
+  chunkMode?: 'auto' | 'page' | 'numbered' | 'window';
+};
+
+type UploadedPdfFile = {
+  originalname: string;
+  mimetype: string;
+  buffer: Buffer;
+};
+
+const DEFAULT_IMPORT_SCHEMA = {
+  test: {
+    title: 'string',
+    year: 'number',
+    date: 'string',
+    duration: 'number',
+    totalQuestions: 'number',
+    isPublished: 'boolean',
+  },
+  questions: [
+    {
+      text: 'string',
+      difficulty: 'string',
+      topic: 'string',
+      explanation: 'string',
+      options: [
+        {
+          text: 'string',
+          isCorrect: 'boolean',
+        },
+      ],
+    },
+  ],
+};
+
+const DEFAULT_IMPORT_INSTRUCTIONS =
+  'Extract one UPSC-style test with all MCQs. Return ONLY valid JSON in the schema. ' +
+  'Set difficulty as EASY, MEDIUM, or HARD. Ensure every question has at least 4 options and exactly one option with isCorrect=true.';
 
 @Injectable()
 export class AdminService {
   constructor(private prisma: PrismaService) {}
+
+  // ── PDF Extraction Proxy ───────────────────────────────────────────────────
+  async extractImportPayloadFromPdf(
+    pdfFile: UploadedPdfFile,
+    options: PdfExtractionOptions,
+  ) {
+    if (!pdfFile) {
+      throw new BadRequestException('pdf_file is required');
+    }
+    if (!pdfFile.originalname.toLowerCase().endsWith('.pdf')) {
+      throw new BadRequestException('Only .pdf files are allowed');
+    }
+
+    const extractUrl =
+      process.env.PDFTOJSON_EXTRACT_URL?.trim() ||
+      'http://127.0.0.1:8000/extract';
+
+    const form = new FormData();
+    const pdfBytes = Uint8Array.from(pdfFile.buffer);
+    form.append(
+      'pdf_file',
+      new Blob([pdfBytes], {
+        type: pdfFile.mimetype || 'application/pdf',
+      }),
+      pdfFile.originalname || 'upload.pdf',
+    );
+    form.append('schema', JSON.stringify(DEFAULT_IMPORT_SCHEMA));
+    form.append(
+      'instructions',
+      options.instructions?.trim() || DEFAULT_IMPORT_INSTRUCTIONS,
+    );
+    form.append('output_format', 'json');
+    form.append('focus_mode', options.focusMode || 'balanced');
+    form.append('chunk_mode', options.chunkMode || 'auto');
+    form.append('provider', options.provider || 'groq');
+    if (options.model?.trim()) {
+      form.append('model', options.model.trim());
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 120_000);
+
+    try {
+      const response = await fetch(extractUrl, {
+        method: 'POST',
+        body: form,
+        signal: controller.signal,
+      });
+
+      const text = await response.text();
+      let payload: unknown = null;
+      try {
+        payload = JSON.parse(text);
+      } catch {
+        // Keep payload null; message fallback below will include raw response text.
+      }
+
+      if (!response.ok) {
+        const message =
+          (payload as { detail?: string; message?: string } | null)?.detail ||
+          (payload as { detail?: string; message?: string } | null)?.message ||
+          text ||
+          'PDF extraction request failed';
+        throw new BadGatewayException(message);
+      }
+
+      const result = payload as {
+        success?: boolean;
+        format?: string;
+        pages?: number;
+        provider?: string;
+        model?: string;
+        data?: unknown;
+      };
+
+      if (!result?.success || result.format !== 'json' || !result.data) {
+        throw new BadGatewayException(
+          'PDF extractor returned unexpected response. Expected JSON data.',
+        );
+      }
+
+      return {
+        success: true,
+        pages: result.pages,
+        provider: result.provider,
+        model: result.model,
+        data: result.data,
+      };
+    } catch (error) {
+      if (error instanceof BadGatewayException) {
+        throw error;
+      }
+      const err = error as { name?: string; message?: string };
+      if (err?.name === 'AbortError') {
+        throw new BadGatewayException(
+          'PDF extraction timed out. Try a smaller file or retry.',
+        );
+      }
+      throw new BadGatewayException(
+        err?.message || 'Failed to call PDF extraction service',
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
 
   // ── Stats ───────────────────────────────────────────────────────────────────
   async getStats() {

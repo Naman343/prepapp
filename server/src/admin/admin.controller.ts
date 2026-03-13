@@ -1,22 +1,31 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
   Body,
-  Param,
-  Query,
-  UseGuards,
-  ParseIntPipe,
+  Controller,
   DefaultValuePipe,
+  Delete,
+  Get,
   HttpCode,
   HttpStatus,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
   BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminService } from './admin.service';
 import { RolesGuard } from './roles.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+
+type UploadedPdfFile = {
+  originalname: string;
+  mimetype: string;
+  buffer: Buffer;
+};
 
 @Controller('admin')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -183,6 +192,28 @@ export class AdminController {
   }
 
   // ── Bulk Import ──────────────────────────────────────────────────────────────
+  @Post('import/extract-pdf')
+  @UseInterceptors(FileInterceptor('pdf_file'))
+  extractPdfForImport(
+    @UploadedFile() pdfFile: UploadedPdfFile,
+    @Body()
+    body: {
+      instructions?: string;
+      provider?: string;
+      model?: string;
+      focus_mode?: 'balanced' | 'focused' | 'exhaustive';
+      chunk_mode?: 'auto' | 'page' | 'numbered' | 'window';
+    },
+  ) {
+    return this.adminService.extractImportPayloadFromPdf(pdfFile, {
+      instructions: body.instructions,
+      provider: body.provider,
+      model: body.model,
+      focusMode: body.focus_mode,
+      chunkMode: body.chunk_mode,
+    });
+  }
+
   @Post('import')
   bulkImport(@Body() body: object) {
     return this.adminService.bulkImport(body as Parameters<AdminService['bulkImport']>[0]);

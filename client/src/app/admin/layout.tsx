@@ -9,6 +9,7 @@ import {
   HelpCircle,
   FileText,
   Upload,
+  Link2,
   LogOut,
   ChevronRight,
 } from "lucide-react"
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin/questions", label: "Questions", icon: HelpCircle },
   { href: "/admin/tests", label: "Tests", icon: FileText },
   { href: "/admin/import", label: "Bulk Import", icon: Upload },
+  { href: "/admin/pdf-extractor", label: "PDF Extractor UI", icon: Link2 },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
