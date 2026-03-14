@@ -28,6 +28,42 @@ export class TestsService {
     });
   }
 
+  async findAllWithStatus(userId: string) {
+    const tests = await this.prisma.test.findMany({
+      where: { isPublished: true },
+      select: {
+        id: true,
+        title: true,
+        duration: true,
+        totalQuestions: true,
+        isPublished: true,
+        year: true,
+        date: true,
+        attempts: {
+          where: { userId },
+          orderBy: { startTime: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            status: true,
+            score: true,
+          },
+        },
+      },
+      orderBy: [{ year: 'desc' }, { createdAt: 'desc' }],
+    });
+
+    return tests.map((test) => {
+      const lastAttempt = test.attempts[0];
+      return {
+        ...test,
+        status: lastAttempt ? lastAttempt.status : 'NOT_STARTED',
+        lastAttemptId: lastAttempt ? lastAttempt.id : null,
+        score: lastAttempt ? lastAttempt.score : null,
+      };
+    });
+  }
+
   findOne(id: string) {
     return this.prisma.test.findUnique({
       where: { id },

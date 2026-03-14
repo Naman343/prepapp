@@ -169,6 +169,7 @@ export class ExamService {
       where: { id: attemptId },
       include: {
         test: { include: { questions: { include: { options: true } } } },
+        responses: true,
       },
     });
 
@@ -176,15 +177,13 @@ export class ExamService {
       throw new BadRequestException('Invalid attempt');
     }
 
-    if (attempt.status === 'COMPLETED') {
-      // If completed, maybe we can show answers? For now, stick to exam scope.
-      // Let's allow viewing history but maybe with answers?
-      // For MVP phase 1, just return questions as is (maybe with answers if calculated).
-      // But for ONGOING, must hide answers.
-    }
-
-    // Shuffle questions
-    const questions = attempt.test.questions.sort(() => 0.5 - Math.random());
+    // Deterministic Shuffle by attemptId + questionId
+    // This ensures order is consistent for a single attempt upon refresh
+    const questions = [...attempt.test.questions].sort((a, b) => {
+        const hashA = (attemptId + a.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const hashB = (attemptId + b.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        return hashA % 100 - hashB % 100 || a.id.localeCompare(b.id);
+    });
 
     // Sanitize (Hide correct answer)
     const sanitizedQuestions = questions.map((q) => ({
@@ -192,15 +191,24 @@ export class ExamService {
       text: q.text,
       difficulty: q.difficulty,
       topicId: q.topicId,
-      options: q.options
-        .sort(() => 0.5 - Math.random())
+      options: [...q.options]
+        .sort((a, b) => a.id.localeCompare(b.id)) // Consistent option order
         .map((o) => ({
           id: o.id,
           text: o.text,
-          // Omit isCorrect
         })),
-      // Omit explanation
     }));
+
+    // Map existing responses by questionId for resume support
+    const responses = attempt.responses.reduce<
+      Record<string, { selectedOptionId: string; markedForReview: boolean }>
+    >((acc, r) => {
+      acc[r.questionId] = {
+        selectedOptionId: r.selectedOptionId,
+        markedForReview: r.markedForReview,
+      };
+      return acc;
+    }, {});
 
     return {
       questions: sanitizedQuestions,
@@ -208,6 +216,7 @@ export class ExamService {
       duration: attempt.test.duration,
       testTitle: attempt.test.title,
       totalQuestions: attempt.test.totalQuestions,
+      responses, // Added for resume support
     };
   }
 

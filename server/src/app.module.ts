@@ -7,6 +7,7 @@ import { QuestionsModule } from './questions/questions.module';
 import { TestsModule } from './tests/tests.module';
 import { ExamModule } from './exam/exam.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     TestsModule,
     ExamModule,
     AnalyticsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

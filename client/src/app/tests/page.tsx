@@ -15,8 +15,9 @@ interface Test {
     isPublished: boolean
     year: number | null
     date: string | null
-    status?: "NOT_STARTED" | "ONGOING" | "COMPLETED"
+    status?: string
     lastAttemptId?: string
+    score?: number
 }
 
 type ActiveTab = "pyq" | "mock"
@@ -80,12 +81,17 @@ export default function TestsPage() {
     const TestRow = ({ test }: { test: Test }) => (
         <div className="flex items-center justify-between gap-4 py-5 px-6 bg-background border border-border/60 rounded-2xl hover:border-foreground/30 hover:shadow-md transition-all duration-200">
             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-3 mb-2">
-                    <p className="text-base font-black text-foreground leading-snug truncate">{test.title}</p>
+                <div className="flex items-center gap-2 mb-2">
+                    <p className="text-base font-black text-foreground leading-snug">{test.title}</p>
                     {test.status === "COMPLETED" && (
-                        <div className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">
-                            Done
-                        </div>
+                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded border border-emerald-100">
+                            DONE
+                        </span>
+                    )}
+                    {test.status === "ONGOING" && (
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded border border-blue-100">
+                            ONGOING
+                        </span>
                     )}
                 </div>
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-bold text-muted-foreground">
@@ -97,7 +103,7 @@ export default function TestsPage() {
                         <span className="text-[10px] font-black border border-current rounded px-0.5">M</span>
                         {test.totalQuestions * 2} Marks
                     </span>
-                    <span className="flex items-center gap-1.5 font-bold text-red-600">
+                    <span className="flex items-center gap-1.5 text-red-600">
                         <Clock className="w-3.5 h-3.5" />
                         {test.duration} Mins
                     </span>
@@ -209,8 +215,8 @@ export default function TestsPage() {
                                             className={cn(
                                                 "px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md",
                                                 selectedYear === year
-                                                    ? "bg-foreground text-background border-foreground"
-                                                    : "bg-background text-foreground border-foreground hover:bg-foreground hover:text-background"
+                                                    ? "bg-red-600 text-white border-red-600"
+                                                    : "bg-background text-foreground border-foreground hover:bg-red-600 hover:text-white hover:border-red-600"
                                             )}
                                         >
                                             {year}
@@ -243,10 +249,6 @@ export default function TestsPage() {
                     </div>
                 )}
             </div>
-
-            <footer className="py-10 px-6 border-t mt-auto text-center">
-                <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026 PrepApp — All Rights Reserved</p>
-            </footer>
         </div>
     )
 }
