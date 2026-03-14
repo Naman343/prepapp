@@ -15,6 +15,9 @@ interface Test {
     isPublished: boolean
     year: number | null
     date: string | null
+    status?: string
+    lastAttemptId?: string
+    score?: number
 }
 
 type ActiveTab = "pyq" | "mock"
@@ -26,7 +29,7 @@ export default function TestsPage() {
     const [loading, setLoading] = useState(true)
     const [starting, setStarting] = useState<string | null>(null)
     const [activeTab, setActiveTab] = useState<ActiveTab>((searchParams.get("tab") as ActiveTab) ?? "pyq")
-    const [selectedYear, setSelectedYear] = useState<number | null>(null)
+    const [selectedYear, setSelectedYear] = useState<number | null | "all">("all")
 
     useEffect(() => {
         const tab = searchParams.get("tab") as ActiveTab
@@ -39,12 +42,13 @@ export default function TestsPage() {
 
     const fetchTests = async () => {
         try {
-            const res = await api.get("/tests")
+            const token = localStorage.getItem("token")
+            const res = token 
+                ? await api.get("/tests/status")
+                : await api.get("/tests")
+            
             const data: Test[] = res.data
             setTests(data)
-            // Default: select the most recent PYQ year
-            const pyqYears = [...new Set(data.filter(t => t.year !== null).map(t => t.year as number))].sort((a, b) => b - a)
-            if (pyqYears.length > 0) setSelectedYear(pyqYears[0])
         } catch (error) {
             console.error("Failed to fetch tests", error)
         } finally {
@@ -70,12 +74,26 @@ export default function TestsPage() {
     const pyqTests = tests.filter(t => t.year !== null)
     const mockTests = tests.filter(t => t.year === null)
     const pyqYears = [...new Set(pyqTests.map(t => t.year as number))].sort((a, b) => b - a)
-    const visiblePyqTests = selectedYear !== null ? pyqTests.filter(t => t.year === selectedYear) : pyqTests
+    const visiblePyqTests = selectedYear === "all" 
+        ? pyqTests 
+        : (selectedYear !== null ? pyqTests.filter(t => t.year === selectedYear) : pyqTests)
 
     const TestRow = ({ test }: { test: Test }) => (
         <div className="flex items-center justify-between gap-4 py-5 px-6 bg-background border border-border/60 rounded-2xl hover:border-foreground/30 hover:shadow-md transition-all duration-200">
             <div className="flex-1 min-w-0">
-                <p className="text-base font-black text-foreground leading-snug mb-2">{test.title}</p>
+                <div className="flex items-center gap-2 mb-2">
+                    <p className="text-base font-black text-foreground leading-snug">{test.title}</p>
+                    {test.status === "COMPLETED" && (
+                        <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded border border-emerald-100">
+                            DONE
+                        </span>
+                    )}
+                    {test.status === "ONGOING" && (
+                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-widest rounded border border-blue-100">
+                            ONGOING
+                        </span>
+                    )}
+                </div>
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-bold text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                         <FileQuestion className="w-3.5 h-3.5" />
@@ -85,7 +103,7 @@ export default function TestsPage() {
                         <span className="text-[10px] font-black border border-current rounded px-0.5">M</span>
                         {test.totalQuestions * 2} Marks
                     </span>
-                    <span className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-1.5 text-red-600">
                         <Clock className="w-3.5 h-3.5" />
                         {test.duration} Mins
                     </span>
@@ -98,21 +116,38 @@ export default function TestsPage() {
                 </div>
             </div>
             <button
-                onClick={() => handleStartTest(test.id)}
+                onClick={() => {
+                    if (test.status === "COMPLETED") {
+                        router.push(`/results/${test.lastAttemptId}`)
+                    } else {
+                        handleStartTest(test.id)
+                    }
+                }}
                 disabled={!!starting}
                 className={cn(
-                    "flex flex-col items-center gap-1 shrink-0 group",
+                    "flex flex-col items-center gap-1 shrink-0 group cursor-pointer",
                     starting && starting !== test.id ? "opacity-40 pointer-events-none" : ""
                 )}
             >
                 <div className={cn(
-                    "w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 shadow",
-                    starting === test.id ? "bg-muted" : "bg-foreground group-hover:scale-110"
+                    "w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm group-hover:shadow-md",
+                    starting === test.id 
+                        ? "bg-muted" 
+                        : test.status === "COMPLETED"
+                            ? "bg-blue-600 group-hover:bg-blue-700 group-hover:-translate-y-0.5"
+                            : "bg-foreground group-hover:bg-zinc-800 group-hover:-translate-y-0.5"
                 )}>
-                    <ArrowRight className={cn("w-5 h-5", starting === test.id ? "text-muted-foreground animate-pulse" : "text-background")} />
+                    {test.status === "COMPLETED" ? (
+                        <ArrowRight className="w-5 h-5 text-white" />
+                    ) : (
+                        <ArrowRight className={cn("w-5 h-5", starting === test.id ? "text-muted-foreground animate-pulse" : "text-background")} />
+                    )}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    {starting === test.id ? "..." : "Start"}
+                <span className={cn(
+                    "text-[10px] font-black uppercase tracking-widest transition-colors",
+                    test.status === "COMPLETED" ? "text-blue-600" : "text-muted-foreground group-hover:text-foreground"
+                )}>
+                    {starting === test.id ? "..." : test.status === "COMPLETED" ? "Analyze" : "Start"}
                 </span>
             </button>
         </div>
@@ -160,20 +195,31 @@ export default function TestsPage() {
                             <EmptyState label="No PYQs available yet" />
                         ) : (
                             <>
-                                {/* Year tabs */}
-                                <div className="flex gap-0 overflow-x-auto border-b border-border mb-6 scrollbar-none">
+                                {/* Year filter pills */}
+                                <div className="flex flex-wrap gap-3 mb-6">
+                                    <button
+                                        onClick={() => setSelectedYear("all")}
+                                        className={cn(
+                                            "px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md",
+                                            selectedYear === "all"
+                                                ? "bg-foreground text-background border-foreground"
+                                                : "bg-background text-foreground border-foreground hover:bg-foreground hover:text-background"
+                                        )}
+                                    >
+                                        All Years
+                                    </button>
                                     {pyqYears.map(year => (
                                         <button
                                             key={year}
                                             onClick={() => setSelectedYear(year)}
                                             className={cn(
-                                                "px-5 py-3 text-xs font-black uppercase tracking-widest whitespace-nowrap border-b-2 transition-all duration-200 -mb-px",
+                                                "px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md",
                                                 selectedYear === year
-                                                    ? "border-blue-600 text-blue-600"
-                                                    : "border-transparent text-muted-foreground hover:text-foreground"
+                                                    ? "bg-red-600 text-white border-red-600"
+                                                    : "bg-background text-foreground border-foreground hover:bg-red-600 hover:text-white hover:border-red-600"
                                             )}
                                         >
-                                            UPSC Prelims {year}
+                                            {year}
                                         </button>
                                     ))}
                                 </div>
@@ -203,10 +249,6 @@ export default function TestsPage() {
                     </div>
                 )}
             </div>
-
-            <footer className="py-10 px-6 border-t mt-auto text-center">
-                <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026 PrepApp — All Rights Reserved</p>
-            </footer>
         </div>
     )
 }
