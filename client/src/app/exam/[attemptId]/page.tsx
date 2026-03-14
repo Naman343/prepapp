@@ -62,12 +62,25 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
         const init = async () => {
             try {
                 const res = await api.get(`/exam/${attemptId}/questions`)
-                const { questions, startTime, duration, testTitle, totalQuestions } = res.data
+                const { questions, startTime, duration, testTitle, totalQuestions, responses } = res.data
                 setQuestions(questions)
                 setExamStartTime(new Date(startTime))
                 setTestDuration(duration)
                 setTestTitle(testTitle || 'UPSC Prelims')
                 setTotalQuestions(totalQuestions || questions.length)
+                
+                // Resume state if responses exist
+                if (responses) {
+                    const newAnswers: Record<string, string> = {}
+                    const newMarked = new Set<string>()
+                    Object.entries(responses as Record<string, { selectedOptionId: string, markedForReview: boolean }>).forEach(([qId, data]) => {
+                        newAnswers[qId] = data.selectedOptionId
+                        if (data.markedForReview) newMarked.add(qId)
+                    })
+                    setAnswers(newAnswers)
+                    setMarkedQuestions(newMarked)
+                }
+
                 if (questions.length > 0) {
                     setVisitedQuestions(new Set([questions[0].id]))
                 }
