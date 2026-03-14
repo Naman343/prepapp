@@ -103,7 +103,7 @@ export default function TestsPage() {
                         <span className="text-[10px] font-black border border-current rounded px-0.5">M</span>
                         {test.totalQuestions * 2} Marks
                     </span>
-                    <span className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-1.5 text-red-600">
                         <Clock className="w-3.5 h-3.5" />
                         {test.duration} Mins
                     </span>
@@ -215,8 +215,8 @@ export default function TestsPage() {
                                             className={cn(
                                                 "px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md",
                                                 selectedYear === year
-                                                    ? "bg-foreground text-background border-foreground"
-                                                    : "bg-background text-foreground border-foreground hover:bg-foreground hover:text-background"
+                                                    ? "bg-red-600 text-white border-red-600"
+                                                    : "bg-background text-foreground border-foreground hover:bg-red-600 hover:text-white hover:border-red-600"
                                             )}
                                         >
                                             {year}
