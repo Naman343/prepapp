@@ -20,6 +20,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { AdminService } from './admin.service';
 import { RolesGuard } from './roles.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import * as fs from 'fs';
+import * as crypto from 'crypto';
 
 type UploadedPdfFile = {
   originalname: string;
@@ -97,9 +101,11 @@ export class AdminController {
     @Body()
     body: {
       text: string;
+      examYear?: number;
       difficulty: 'EASY' | 'MEDIUM' | 'HARD';
       explanation?: string;
       topicId: string;
+      imageUrl?: string;
       options: { text: string; isCorrect: boolean }[];
     },
   ) {
@@ -112,9 +118,11 @@ export class AdminController {
     @Body()
     body: {
       text?: string;
+      examYear?: number;
       difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
       explanation?: string;
       topicId?: string;
+      imageUrl?: string;
       options?: { text: string; isCorrect: boolean }[];
     },
   ) {
@@ -217,5 +225,35 @@ export class AdminController {
   @Post('import')
   bulkImport(@Body() body: object) {
     return this.adminService.bulkImport(body as Parameters<AdminService['bulkImport']>[0]);
+  }
+
+  // ── Image Upload ──────────────────────────────────────────────────────────────
+  @Post('upload-image')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          const dir = join(process.cwd(), 'uploads');
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+          cb(null, dir);
+        },
+        filename: (_req, file, cb) => {
+          const unique = crypto.randomBytes(10).toString('hex');
+          cb(null, `${unique}${extname(file.originalname)}`);
+        },
+      }),
+      fileFilter: (_req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) {
+          cb(new BadRequestException('Only image files are allowed'), false);
+        } else {
+          cb(null, true);
+        }
+      },
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+    }),
+  )
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    if (!file) throw new BadRequestException('No image uploaded');
+    return { url: `/uploads/${file.filename}` };
   }
 }

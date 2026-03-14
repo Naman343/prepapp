@@ -16,6 +16,7 @@ interface ImportPayload {
   }
   questions: {
     text: string
+    examYear?: number
     difficulty: string
     topic: string
     explanation?: string
@@ -45,6 +46,8 @@ function validate(data: unknown): { ok: true; payload: ImportPayload } | { ok: f
   for (let i = 0; i < (d.questions as unknown[]).length; i++) {
     const q = (d.questions as Record<string, unknown>[])[i]
     if (!q.text) return { ok: false, error: `Question ${i + 1}: "text" is required` }
+    if (q.examYear !== undefined && typeof q.examYear !== "number")
+      return { ok: false, error: `Question ${i + 1}: "examYear" must be a number` }
     if (!q.topic) return { ok: false, error: `Question ${i + 1}: "topic" is required` }
     if (!q.difficulty) return { ok: false, error: `Question ${i + 1}: "difficulty" is required` }
     if (!Array.isArray(q.options) || (q.options as unknown[]).length < 2)
@@ -53,6 +56,67 @@ function validate(data: unknown): { ok: true; payload: ImportPayload } | { ok: f
     if (!hasCorrect) return { ok: false, error: `Question ${i + 1}: no correct option marked` }
   }
   return { ok: true, payload: data as ImportPayload }
+}
+
+const OPTION_KEYS = ["a", "b", "c", "d", "e"]
+
+function convertPyqFormat(raw: unknown): string {
+  if (typeof raw !== "object" || !raw) throw new Error("Not a valid JSON object")
+  const d = raw as Record<string, unknown>
+  if (!Array.isArray(d.questions) || d.questions.length === 0)
+    throw new Error("No 'questions' array found")
+
+  type PYQQuestion = {
+    exam_year?: number
+    topic?: string
+    question?: string
+    options?: Record<string, string>
+    correct_answer?: string
+    explanation?: string
+  }
+  const pyqQs = d.questions as PYQQuestion[]
+
+  if (!pyqQs[0].question && !pyqQs[0].correct_answer)
+    throw new Error("Does not look like PYQ format — missing 'question' or 'correct_answer'")
+
+  // Pick most common exam_year as the test year
+  const years = pyqQs.map((q) => q.exam_year).filter(Boolean) as number[]
+  const yearCount = years.reduce<Record<number, number>>((acc, y) => { acc[y] = (acc[y] || 0) + 1; return acc }, {})
+  const year = years.length > 0
+    ? Number(Object.entries(yearCount).sort((a, b) => b[1] - a[1])[0][0])
+    : new Date().getFullYear()
+
+  const questions = pyqQs.map((q, i) => {
+    const opts = q.options ?? {}
+    const correct = q.correct_answer?.toLowerCase() ?? ""
+    const options = OPTION_KEYS.filter((k) => k in opts).map((k) => ({
+      text: opts[k],
+      isCorrect: k === correct,
+    }))
+    return {
+      text: q.question ?? `Question ${i + 1}`,
+      ...(typeof q.exam_year === "number" ? { examYear: q.exam_year } : {}),
+      difficulty: "MEDIUM",
+      topic: q.topic ?? "General Studies",
+      ...(q.explanation ? { explanation: q.explanation } : {}),
+      options,
+    }
+  })
+
+  return JSON.stringify(
+    {
+      test: {
+        title: `UPSC Prelims ${year} GS-1`,
+        year,
+        duration: 120,
+        totalQuestions: questions.length,
+        isPublished: false,
+      },
+      questions,
+    },
+    null,
+    2
+  )
 }
 
 const EXAMPLE_JSON = `{
@@ -86,6 +150,8 @@ export default function ImportPage() {
   const [parseError, setParseError] = useState("")
   const [status, setStatus] = useState<"idle" | "importing" | "success" | "error">("idle")
   const [resultMsg, setResultMsg] = useState("")
+
+  const [convertError, setConvertError] = useState("")
 
   const [pdfFile, setPdfFile] = useState<File | null>(null)
   const [extracting, setExtracting] = useState(false)
@@ -210,12 +276,31 @@ export default function ImportPage() {
     }
   }
 
+  const handleConvertPyq = () => {
+    setConvertError("")
+    setParsed(null)
+    setParseError("")
+    if (!jsonText.trim()) { setConvertError("Paste PYQ JSON first"); return }
+    try {
+      const raw = JSON.parse(jsonText)
+      const converted = convertPyqFormat(raw)
+      setJsonText(converted)
+      // auto-validate
+      const result = validate(JSON.parse(converted))
+      if (!result.ok) setParseError(result.error)
+      else setParsed(result.payload)
+    } catch (e) {
+      setConvertError((e as Error).message)
+    }
+  }
+
   const reset = () => {
     setJsonText("")
     setParsed(null)
     setParseError("")
     setStatus("idle")
     setResultMsg("")
+    setConvertError("")
   }
 
   return (
@@ -383,11 +468,24 @@ export default function ImportPage() {
             <AlertCircle className="w-4 h-4" /> {parseError}
           </p>
         )}
+        {convertError && (
+          <p className="text-red-500 text-sm flex items-center gap-1.5">
+            <AlertCircle className="w-4 h-4" /> {convertError}
+          </p>
+        )}
 
-        <div className="flex gap-2 justify-end">
+        <div className="flex gap-2 justify-end flex-wrap">
           {jsonText && (
             <Button variant="outline" onClick={reset}>Clear</Button>
           )}
+          <Button
+            variant="outline"
+            onClick={handleConvertPyq}
+            disabled={!jsonText.trim()}
+            title="Converts PYQ format (exam_year / question / correct_answer) to import schema"
+          >
+            Convert PYQ Format
+          </Button>
           <Button onClick={handleParse} disabled={!jsonText.trim()}>
             Validate JSON
           </Button>
@@ -441,6 +539,7 @@ export default function ImportPage() {
   "questions": [
     {
       "text": string,          // required
+      "examYear": number,      // optional  e.g. 2021 (per-question year)
       "difficulty": "EASY" | "MEDIUM" | "HARD",  // required
       "topic": string,         // required  e.g. "Modern History"
       "explanation": string,   // optional

@@ -33,6 +33,7 @@ const DEFAULT_IMPORT_SCHEMA = {
   questions: [
     {
       text: 'string',
+      examYear: 'number',
       difficulty: 'string',
       topic: 'string',
       explanation: 'string',
@@ -229,7 +230,11 @@ export class AdminService {
         where,
         skip,
         take: limit,
-        include: { options: true, topic: { include: { subject: true } } },
+        include: {
+          options: true,
+          topic: { include: { subject: true } },
+          tests: { select: { year: true, title: true } },
+        },
         orderBy: { topic: { name: 'asc' } },
       }),
       this.prisma.question.count({ where }),
@@ -239,17 +244,21 @@ export class AdminService {
 
   createQuestion(data: {
     text: string;
+    examYear?: number;
     difficulty: Difficulty;
     explanation?: string;
     topicId: string;
+    imageUrl?: string;
     options: { text: string; isCorrect: boolean }[];
   }) {
     return this.prisma.question.create({
       data: {
         text: data.text,
+        ...(data.examYear !== undefined ? { examYear: data.examYear } : {}),
         difficulty: data.difficulty,
         explanation: data.explanation,
         topicId: data.topicId,
+        imageUrl: data.imageUrl,
         options: { create: data.options },
       },
       include: { options: true },
@@ -260,9 +269,11 @@ export class AdminService {
     id: string,
     data: {
       text?: string;
+      examYear?: number;
       difficulty?: Difficulty;
       explanation?: string;
       topicId?: string;
+      imageUrl?: string;
       options?: { text: string; isCorrect: boolean }[];
     },
   ) {
@@ -368,6 +379,7 @@ export class AdminService {
     };
     questions: {
       text: string;
+      examYear?: number;
       difficulty: string;
       topic: string;
       explanation?: string;
@@ -413,6 +425,7 @@ export class AdminService {
       const question = await this.prisma.question.create({
         data: {
           text: q.text,
+          ...(q.examYear !== undefined ? { examYear: q.examYear } : {}),
           difficulty: q.difficulty as Difficulty,
           explanation: q.explanation,
           topicId: topicMap[q.topic],

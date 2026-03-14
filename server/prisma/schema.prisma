@@ -77,6 +77,7 @@ model Question {
   id          String     @id @default(uuid())
   text        String
   imageUrl    String?
+  examYear    Int?
   difficulty  Difficulty
   explanation String?
   
