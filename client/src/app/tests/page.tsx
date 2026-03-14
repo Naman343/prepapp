@@ -15,9 +15,8 @@ interface Test {
     isPublished: boolean
     year: number | null
     date: string | null
-    status?: string
+    status?: "NOT_STARTED" | "ONGOING" | "COMPLETED"
     lastAttemptId?: string
-    score?: number
 }
 
 type ActiveTab = "pyq" | "mock"
@@ -79,22 +78,16 @@ export default function TestsPage() {
         : (selectedYear !== null ? pyqTests.filter(t => t.year === selectedYear) : pyqTests)
 
     const TestRow = ({ test }: { test: Test }) => (
-        <div className="flex items-center justify-between gap-4 py-5 px-6 bg-background border border-border/60 rounded-2xl hover:border-foreground/30 hover:shadow-md transition-all duration-200 cursor-pointer group">
+        <div className="flex items-center justify-between gap-4 py-5 px-6 bg-background border border-border/60 rounded-2xl hover:border-foreground/30 hover:shadow-md transition-all duration-200">
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-black text-base text-foreground truncate group-hover:text-blue-600 transition-colors">{test.title}</h3>
-                    <div className={cn(
-                        "px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest border",
-                        test.status === "COMPLETED"
-                            ? "bg-emerald-50 text-emerald-600 border-emerald-100"
-                            : test.status === "ONGOING"
-                                ? "bg-blue-50 text-blue-600 border-blue-100"
-                                : "bg-muted text-muted-foreground border-border"
-                    )}>
-                        {test.status === "COMPLETED" ? "Done" : test.status === "ONGOING" ? "Ongoing" : "New"}
-                    </div>
+                    <p className="text-base font-black text-foreground leading-snug truncate">{test.title}</p>
+                    {test.status === "COMPLETED" && (
+                        <div className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-100">
+                            Done
+                        </div>
+                    )}
                 </div>
-
                 <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs font-bold text-muted-foreground">
                     <span className="flex items-center gap-1.5">
                         <FileQuestion className="w-3.5 h-3.5" />
@@ -104,7 +97,7 @@ export default function TestsPage() {
                         <span className="text-[10px] font-black border border-current rounded px-0.5">M</span>
                         {test.totalQuestions * 2} Marks
                     </span>
-                    <span className="flex items-center gap-1.5">
+                    <span className="flex items-center gap-1.5 font-bold text-red-600">
                         <Clock className="w-3.5 h-3.5" />
                         {test.duration} Mins
                     </span>
@@ -163,7 +156,6 @@ export default function TestsPage() {
             <p className="text-sm text-muted-foreground max-w-xs">Check back soon, we're adding content regularly.</p>
         </div>
     )
-
     if (loading) return (
         <div className="min-h-screen bg-muted/20">
             <Navbar />
