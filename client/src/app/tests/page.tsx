@@ -43,10 +43,10 @@ export default function TestsPage() {
     const fetchTests = async () => {
         try {
             const token = localStorage.getItem("token")
-            const res = token 
+            const res = token
                 ? await api.get("/tests/status")
                 : await api.get("/tests")
-            
+
             const data: Test[] = res.data
             setTests(data)
         } catch (error) {
@@ -74,8 +74,8 @@ export default function TestsPage() {
     const pyqTests = tests.filter(t => t.year !== null)
     const mockTests = tests.filter(t => t.year === null)
     const pyqYears = [...new Set(pyqTests.map(t => t.year as number))].sort((a, b) => b - a)
-    const visiblePyqTests = selectedYear === "all" 
-        ? pyqTests 
+    const visiblePyqTests = selectedYear === "all"
+        ? pyqTests
         : (selectedYear !== null ? pyqTests.filter(t => t.year === selectedYear) : pyqTests)
 
     const TestRow = ({ test }: { test: Test }) => (
@@ -131,8 +131,8 @@ export default function TestsPage() {
             >
                 <div className={cn(
                     "w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm group-hover:shadow-md",
-                    starting === test.id 
-                        ? "bg-muted" 
+                    starting === test.id
+                        ? "bg-muted"
                         : test.status === "COMPLETED"
                             ? "bg-blue-600 group-hover:bg-blue-700 group-hover:-translate-y-0.5"
                             : "bg-foreground group-hover:bg-zinc-800 group-hover:-translate-y-0.5"

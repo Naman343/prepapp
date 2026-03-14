@@ -30,6 +30,11 @@ export default function Home() {
       .then(res => {
         setUser(res.data)
         localStorage.setItem("user", JSON.stringify(res.data))
+        if (res.data.name) {
+          localStorage.setItem("userName", res.data.name)
+        } else {
+          localStorage.setItem("userName", res.data.email?.split('@')[0] || "User")
+        }
       })
       .catch(() => {
         // Token expired or invalid — clear stale data
@@ -95,7 +100,7 @@ export default function Home() {
             <header className="mb-10">
               <h2 className="text-[10px] uppercase font-bold text-blue-600 tracking-[0.3em] mb-2 px-1">DASHBOARD</h2>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight flex items-center gap-3">
-                Welcome back, {user.email?.split('@')[0]}
+                Welcome back, {user.name || user.email?.split('@')[0]}
                 <span className="text-blue-500 animate-bounce-subtle">👋</span>
               </h1>
             </header>
