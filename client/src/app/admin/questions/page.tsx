@@ -8,7 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
 interface Option { id: string; text: string; isCorrect: boolean }
-interface Topic { id: string; name: string; subject: { name: string } }
+interface Topic {
+  id: string
+  name: string
+  parentTopicId?: string | null
+  subject: { id: string; name: string }
+  subTopics?: { id: string; name: string }[]
+}
 interface Question {
   id: string
   text: string
@@ -16,7 +22,7 @@ interface Question {
   examYear?: number | null
   difficulty: "EASY" | "MEDIUM" | "HARD"
   explanation?: string
-  topic: { id: string; name: string; subject: { name: string } }
+  topic: { id: string; name: string; parentTopicId?: string | null; subject: { name: string } }
   options: Option[]
   tests: { year: number | null; title: string }[]
 }
@@ -40,15 +46,29 @@ function QuestionForm({
   onSuccess: () => void
   onCancel: () => void
 }) {
+  const initialYear = initialData?.examYear ?? initialData?.tests.find((t) => t.year)?.year
+  const initialParentTopicId = initialData?.topic.parentTopicId ?? initialData?.topic.id ?? ""
+  const initialSubTopicId = initialData?.topic.parentTopicId ? initialData.topic.id : ""
+
   const [text, setText] = useState(initialData?.text ?? "")
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl ?? "")
   const [imgUploading, setImgUploading] = useState(false)
   const [imgError, setImgError] = useState("")
   const imgRef = useRef<HTMLInputElement>(null)
   const [difficulty, setDifficulty] = useState<"EASY" | "MEDIUM" | "HARD">(initialData?.difficulty ?? "MEDIUM")
-  const [examYear, setExamYear] = useState(initialData?.examYear ? String(initialData.examYear) : "")
+  const [examYear, setExamYear] = useState(initialYear ? String(initialYear) : "")
   const [explanation, setExplanation] = useState(initialData?.explanation ?? "")
-  const [topicId, setTopicId] = useState(initialData?.topic.id ?? "")
+  const [topicId, setTopicId] = useState(initialParentTopicId)
+  const [subTopicId, setSubTopicId] = useState(initialSubTopicId)
+  const [newTopicMode, setNewTopicMode] = useState(false)
+  const [newTopicName, setNewTopicName] = useState("")
+  const [newTopicSubjectId, setNewTopicSubjectId] = useState("")
+  const [newSubtopicMode, setNewSubtopicMode] = useState(false)
+  const [newSubtopicName, setNewSubtopicName] = useState("")
+  const [subjects, setSubjects] = useState<{ id: string; name: string }[]>([])
+  useEffect(() => {
+    api.get<{ id: string; name: string }[]>("/admin/subjects").then((r) => setSubjects(r.data))
+  }, [])
   const [options, setOptions] = useState(
     initialData?.options.map((o) => ({ text: o.text, isCorrect: o.isCorrect })) ?? [
       { text: "", isCorrect: false },
@@ -59,6 +79,10 @@ function QuestionForm({
   )
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
+
+  const parentTopics = topics.filter((t) => !t.parentTopicId)
+  const selectedParentTopic = parentTopics.find((t) => t.id === topicId)
+  const subTopics = selectedParentTopic?.subTopics ?? []
 
   const setCorrect = (i: number) =>
     setOptions((prev) => prev.map((o, j) => ({ ...o, isCorrect: j === i })))
@@ -91,7 +115,30 @@ function QuestionForm({
     e.preventDefault()
     setError("")
     if (!text.trim()) return setError("Question text is required")
-    if (!topicId) return setError("Please select a topic")
+    let finalTopicId = subTopicId || topicId
+    // Create new topic if in new-topic mode
+    if (newTopicMode) {
+      if (!newTopicName.trim()) return setError("New topic name is required")
+      if (!newTopicSubjectId) return setError("Please select a subject for the new topic")
+      try {
+        const r = await api.post<{ id: string }>("/admin/topics", { name: newTopicName.trim(), subjectId: newTopicSubjectId })
+        finalTopicId = r.data.id
+      } catch {
+        return setError("Failed to create topic")
+      }
+    }
+    // Create new subtopic if in new-subtopic mode
+    if (newSubtopicMode && newSubtopicName.trim()) {
+      if (!finalTopicId) return setError("Select a parent topic before creating a subtopic")
+      const parentSubjectId = newTopicMode ? newTopicSubjectId : (topics.find((t) => t.id === finalTopicId)?.subject.id ?? "")
+      try {
+        const r = await api.post<{ id: string }>("/admin/topics", { name: newSubtopicName.trim(), subjectId: parentSubjectId, parentTopicId: finalTopicId })
+        finalTopicId = r.data.id
+      } catch {
+        return setError("Failed to create subtopic")
+      }
+    }
+    if (!finalTopicId) return setError("Please select or create a topic")
     const filled = options.filter((o) => o.text.trim())
     if (filled.length < 2) return setError("At least 2 options are required")
     if (!filled.some((o) => o.isCorrect)) return setError("Mark one option as correct")
@@ -107,7 +154,7 @@ function QuestionForm({
           examYear: examYearNum,
           difficulty,
           explanation: explanation.trim() || undefined,
-          topicId,
+          topicId: finalTopicId,
           imageUrl: imageUrl || undefined,
           options: filled,
         })
@@ -117,7 +164,7 @@ function QuestionForm({
           examYear: examYearNum,
           difficulty,
           explanation: explanation.trim() || undefined,
-          topicId,
+          topicId: finalTopicId,
           imageUrl: imageUrl || undefined,
           options: filled,
         })
@@ -219,20 +266,88 @@ function QuestionForm({
           />
         </div>
         <div className="space-y-1.5">
-          <Label>Topic</Label>
+          <div className="flex items-center justify-between">
+            <Label>Topic</Label>
+            <button
+              type="button"
+              className="text-xs text-blue-600 hover:underline"
+              onClick={() => { setNewTopicMode((v) => !v); setNewTopicName(""); setNewTopicSubjectId(""); setNewSubtopicMode(false) }}
+            >
+              {newTopicMode ? "← Pick existing" : "+ Create new"}
+            </button>
+          </div>
+          {newTopicMode ? (
+            <div className="space-y-2">
+              <select
+                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                value={newTopicSubjectId}
+                onChange={(e) => setNewTopicSubjectId(e.target.value)}
+              >
+                <option value="">Select subject...</option>
+                {subjects.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+              <Input
+                placeholder="New topic name..."
+                value={newTopicName}
+                onChange={(e) => setNewTopicName(e.target.value)}
+              />
+            </div>
+          ) : (
+            <select
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              value={topicId}
+              onChange={(e) => {
+                setTopicId(e.target.value)
+                setSubTopicId("")
+              }}
+            >
+              <option value="">Select topic...</option>
+              {parentTopics.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.subject.name} — {t.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label>Subtopic <span className="text-muted-foreground">(optional)</span></Label>
+          {(newTopicMode || topicId) && (
+            <button
+              type="button"
+              className="text-xs text-blue-600 hover:underline"
+              onClick={() => { setNewSubtopicMode((v) => !v); setNewSubtopicName("") }}
+            >
+              {newSubtopicMode ? "← Pick existing" : "+ Create new"}
+            </button>
+          )}
+        </div>
+        {newSubtopicMode ? (
+          <Input
+            placeholder="New subtopic name..."
+            value={newSubtopicName}
+            onChange={(e) => setNewSubtopicName(e.target.value)}
+          />
+        ) : (
           <select
             className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-            value={topicId}
-            onChange={(e) => setTopicId(e.target.value)}
+            value={subTopicId}
+            onChange={(e) => setSubTopicId(e.target.value)}
+            disabled={newTopicMode || !topicId || subTopics.length === 0}
           >
-            <option value="">Select topic...</option>
-            {topics.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.subject.name} — {t.name}
+            <option value="">No subtopic</option>
+            {subTopics.map((st) => (
+              <option key={st.id} value={st.id}>
+                {st.name}
               </option>
             ))}
           </select>
-        </div>
+        )}
       </div>
 
       <div className="space-y-1.5">
@@ -299,24 +414,43 @@ export default function QuestionsPage() {
   const [page, setPage] = useState(1)
   const [topics, setTopics] = useState<Topic[]>([])
   const [filterTopicId, setFilterTopicId] = useState("")
+  const [filterSubtopicId, setFilterSubtopicId] = useState("")
+  const [filterDifficulty, setFilterDifficulty] = useState("")
+  const [filterYear, setFilterYear] = useState("")
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null)
 
+  useEffect(() => {
+    const handler = () => {
+      setShowForm(false)
+      setEditingQuestion(null)
+    }
+    window.addEventListener("admin-nav-reset", handler)
+    return () => window.removeEventListener("admin-nav-reset", handler)
+  }, [])
+
   const limit = 20
+
+  const filterParentTopics = topics.filter((t) => !t.parentTopicId)
+  const filterSelectedParent = filterParentTopics.find((t) => t.id === filterTopicId)
+  const filterSubtopics = filterSelectedParent?.subTopics ?? []
 
   const fetchQuestions = useCallback(async () => {
     setLoading(true)
     try {
       const params: Record<string, string | number> = { page, limit }
-      if (filterTopicId) params.topicId = filterTopicId
+      const effectiveTopicId = filterSubtopicId || filterTopicId
+      if (effectiveTopicId) params.topicId = effectiveTopicId
+      if (filterDifficulty) params.difficulty = filterDifficulty
+      if (filterYear) params.examYear = filterYear
       const r = await api.get("/admin/questions", { params })
       setQuestions(r.data.questions)
       setTotal(r.data.total)
     } finally {
       setLoading(false)
     }
-  }, [page, filterTopicId])
+  }, [page, filterTopicId, filterSubtopicId, filterDifficulty, filterYear])
 
   useEffect(() => {
     api.get("/admin/topics").then((r) => setTopics(r.data))
@@ -335,19 +469,55 @@ export default function QuestionsPage() {
   return (
     <div className="space-y-6">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         <select
           className="h-9 rounded-md border border-input bg-background px-3 text-sm"
           value={filterTopicId}
-          onChange={(e) => { setFilterTopicId(e.target.value); setPage(1) }}
+          onChange={(e) => { setFilterTopicId(e.target.value); setFilterSubtopicId(""); setPage(1) }}
         >
           <option value="">All topics</option>
-          {topics.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.subject.name} — {t.name}
-            </option>
+          {filterParentTopics.map((t) => (
+            <option key={t.id} value={t.id}>{t.subject.name} — {t.name}</option>
           ))}
         </select>
+        <select
+          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          value={filterSubtopicId}
+          onChange={(e) => { setFilterSubtopicId(e.target.value); setPage(1) }}
+          disabled={!filterTopicId || filterSubtopics.length === 0}
+        >
+          <option value="">{filterTopicId && filterSubtopics.length === 0 ? "No subtopics" : "All subtopics"}</option>
+          {filterSubtopics.map((st) => (
+            <option key={st.id} value={st.id}>{st.name}</option>
+          ))}
+        </select>
+        <select
+          className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          value={filterDifficulty}
+          onChange={(e) => { setFilterDifficulty(e.target.value); setPage(1) }}
+        >
+          <option value="">All difficulties</option>
+          <option value="EASY">Easy</option>
+          <option value="MEDIUM">Medium</option>
+          <option value="HARD">Hard</option>
+        </select>
+        <input
+          type="number"
+          min={1900}
+          max={2100}
+          placeholder="Year"
+          className="h-9 w-24 rounded-md border border-input bg-background px-3 text-sm"
+          value={filterYear}
+          onChange={(e) => { setFilterYear(e.target.value); setPage(1) }}
+        />
+        {(filterTopicId || filterSubtopicId || filterDifficulty || filterYear) && (
+          <button
+            className="h-9 px-2 text-xs text-muted-foreground hover:text-foreground border border-input rounded-md"
+            onClick={() => { setFilterTopicId(""); setFilterSubtopicId(""); setFilterDifficulty(""); setFilterYear(""); setPage(1) }}
+          >
+            Clear
+          </button>
+        )}
         <span className="text-sm text-muted-foreground ml-auto">
           {total} question{total !== 1 ? "s" : ""}
         </span>
@@ -454,14 +624,14 @@ export default function QuestionsPage() {
                 <div className="flex flex-col gap-1 shrink-0 self-start">
                   <button
                     onClick={() => { setShowForm(false); setEditingQuestion(q) }}
-                    className="p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                    className="p-1.5 rounded border border-transparent hover:border-border hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950 dark:hover:text-blue-300 transition-all duration-150"
                     title="Edit question"
                   >
                     <Pencil className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(q.id)}
-                    className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                    className="p-1.5 rounded border border-transparent hover:border-red-200 hover:bg-red-50 hover:text-red-700 dark:hover:border-red-800 dark:hover:bg-red-950 dark:hover:text-red-300 transition-all duration-150"
                     title="Delete question"
                   >
                     <Trash2 className="w-4 h-4" />

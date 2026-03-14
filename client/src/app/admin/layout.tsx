@@ -74,10 +74,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                onClick={() => {
+                  if (isActive) {
+                    window.dispatchEvent(new CustomEvent("admin-nav-reset", { detail: { href } }))
+                  }
+                }}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-all duration-150 ${
                   isActive
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "bg-gray-900 text-white hover:bg-gray-700"
+                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
                 }`}
               >
                 <Icon className="w-4 h-4 shrink-0" />

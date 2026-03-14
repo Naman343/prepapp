@@ -222,9 +222,12 @@ export class AdminService {
   }
 
   // ── Questions ───────────────────────────────────────────────────────────────
-  async getQuestions(page = 1, limit = 20, topicId?: string) {
+  async getQuestions(page = 1, limit = 20, topicId?: string, difficulty?: string, examYear?: number) {
     const skip = (page - 1) * limit;
-    const where = topicId ? { topicId } : {};
+    const where: Record<string, unknown> = {};
+    if (topicId) where.topicId = topicId;
+    if (difficulty) where.difficulty = difficulty;
+    if (examYear) where.examYear = examYear;
     const [questions, total] = await Promise.all([
       this.prisma.question.findMany({
         where,

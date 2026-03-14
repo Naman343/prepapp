@@ -92,8 +92,10 @@ export class AdminController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Query('topicId') topicId?: string,
+    @Query('difficulty') difficulty?: string,
+    @Query('examYear', new DefaultValuePipe(0), ParseIntPipe) examYear?: number,
   ) {
-    return this.adminService.getQuestions(page, limit, topicId);
+    return this.adminService.getQuestions(page, limit, topicId, difficulty, examYear || undefined);
   }
 
   @Post('questions')
