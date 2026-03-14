@@ -1,0 +1,3 @@
+-- Run on NODE B (connected to prepapp DB)
+DROP PUBLICATION IF EXISTS pub_b;
+CREATE PUBLICATION pub_b FOR ALL TABLES;
