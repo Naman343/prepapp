@@ -8,7 +8,23 @@ import * as bcrypt from 'bcrypt';
 async function main() {
     console.log('Seeding data...')
 
-    // 0. Create Test User
+    // 0a. Create Default Admin
+    const adminPassword = 'Admin@1234';
+    const adminHash = await bcrypt.hash(adminPassword, 10);
+    await prisma.user.upsert({
+        where: { email: 'admin@prepapp.com' },
+        update: {},
+        create: {
+            email: 'admin@prepapp.com',
+            passwordHash: adminHash,
+            role: 'ADMIN',
+            name: 'Admin',
+            memberId: randomBytes(6).toString('hex'),
+        },
+    });
+    console.log('Admin created: admin@prepapp.com / Admin@1234');
+
+    // 0b. Create Test User
     const registerPassword = 'Password123';
     const hashedPassword = await bcrypt.hash(registerPassword, 10);
     const testUser = await prisma.user.upsert({
@@ -25,26 +41,39 @@ async function main() {
 
 
     // 1. Create Subject (Required for Topics)
-    const gsSubject = await prisma.subject.create({
-        data: { name: 'General Studies' }
+    const gsSubject = await prisma.subject.upsert({
+        where: { name: 'General Studies' },
+        update: {},
+        create: { name: 'General Studies' },
     })
 
     // 2. Create Topics connected to Subject
-    const history = await prisma.topic.create({ data: { name: 'History', subjectId: gsSubject.id } })
-    const polity = await prisma.topic.create({ data: { name: 'Polity', subjectId: gsSubject.id } })
-    const geography = await prisma.topic.create({ data: { name: 'Geography', subjectId: gsSubject.id } })
-    const economy = await prisma.topic.create({ data: { name: 'Economy', subjectId: gsSubject.id } })
+    const findOrCreateTopic = async (name: string) => {
+        const existing = await prisma.topic.findFirst({ where: { name, subjectId: gsSubject.id } })
+        if (existing) return existing
+        return prisma.topic.create({ data: { name, subjectId: gsSubject.id } })
+    }
 
-    // 3. Create the Test
-    const mockTest = await prisma.test.create({
-        data: {
-            title: 'UPSC Prelims 2023 - GS Paper 1 (Sample)',
-            duration: 120, // 2 hours
-            totalQuestions: 10, // Small sample for now
-            year: 2023,
-            isPublished: true,
-        }
+    const history = await findOrCreateTopic('History')
+    const polity = await findOrCreateTopic('Polity')
+    const geography = await findOrCreateTopic('Geography')
+    const economy = await findOrCreateTopic('Economy')
+
+    // 3. Create the Test (skip if already exists)
+    let mockTest = await prisma.test.findFirst({
+        where: { title: 'UPSC Prelims 2023 - GS Paper 1 (Sample)', year: 2023 },
     })
+    if (!mockTest) {
+        mockTest = await prisma.test.create({
+            data: {
+                title: 'UPSC Prelims 2023 - GS Paper 1 (Sample)',
+                duration: 120,
+                totalQuestions: 10,
+                year: 2023,
+                isPublished: true,
+            },
+        })
+    }
 
     // 4. Create Questions (Mixed Topics)
     const questions = [
@@ -113,6 +142,11 @@ async function main() {
 
     for (const q of questions) {
         const { options, ...questionData } = q
+        // Skip if an identical question already exists in this test
+        const exists = await prisma.question.findFirst({
+            where: { text: questionData.text, topicId: questionData.topicId },
+        })
+        if (exists) continue
         await prisma.question.create({
             data: {
                 ...questionData,
