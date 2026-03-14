@@ -199,13 +199,15 @@ export class ExamService {
         })),
     }));
 
-    // Map existing responses
-    const responses = attempt.responses.reduce((acc, r) => {
-        acc[r.questionId] = {
-            selectedOptionId: r.selectedOptionId,
-            markedForReview: r.markedForReview
-        };
-        return acc;
+    // Map existing responses by questionId for resume support
+    const responses = attempt.responses.reduce<
+      Record<string, { selectedOptionId: string; markedForReview: boolean }>
+    >((acc, r) => {
+      acc[r.questionId] = {
+        selectedOptionId: r.selectedOptionId,
+        markedForReview: r.markedForReview,
+      };
+      return acc;
     }, {});
 
     return {
