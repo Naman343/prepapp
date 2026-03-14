@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,6 +5,101 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  passwordHash String
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  category     Category?
+  dob          DateTime?
+  location     String?
+  memberId     String        @unique
+  memberTier   MemberTier    @default(FREE)
+  mobileNumber String?
+  name         String?
+  pwd          Boolean?
+  testAttempts TestAttempt[]
+}
+
+model Subject {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  topics Topic[]
+}
+
+model Topic {
+  id            String     @id @default(uuid())
+  name          String
+  subjectId     String
+  parentTopicId String?
+  questions     Question[]
+  parentTopic   Topic?     @relation("SubTopics", fields: [parentTopicId], references: [id])
+  subTopics     Topic[]    @relation("SubTopics")
+  subject       Subject    @relation(fields: [subjectId], references: [id])
+}
+
+model Question {
+  id          String     @id @default(uuid())
+  text        String
+  imageUrl    String?
+  difficulty  Difficulty
+  explanation String?
+  topicId     String
+  options     Option[]
+  topic       Topic      @relation(fields: [topicId], references: [id])
+  responses   Response[]
+  tests       Test[]     @relation("TestQuestions")
+}
+
+model Option {
+  id         String     @id @default(uuid())
+  text       String
+  isCorrect  Boolean    @default(false)
+  questionId String
+  question   Question   @relation(fields: [questionId], references: [id])
+  responses  Response[]
+}
+
+model Test {
+  id             String        @id @default(uuid())
+  title          String
+  duration       Int
+  totalQuestions Int
+  isPublished    Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  year           Int?
+  date           DateTime?
+  attempts       TestAttempt[]
+  questions      Question[]    @relation("TestQuestions")
+}
+
+model TestAttempt {
+  id         String     @id @default(uuid())
+  userId     String
+  testId     String
+  startTime  DateTime   @default(now())
+  submitTime DateTime?
+  score      Float?
+  status     String     @default("ONGOING")
+  responses  Response[]
+  test       Test       @relation(fields: [testId], references: [id])
+  user       User       @relation(fields: [userId], references: [id])
+}
+
+model Response {
+  id               String      @id @default(uuid())
+  attemptId        String
+  questionId       String
+  selectedOptionId String
+  isCorrect        Boolean
+  timeTaken        Int?
+  markedForReview  Boolean     @default(false)
+  attempt          TestAttempt @relation(fields: [attemptId], references: [id])
+  question         Question    @relation(fields: [questionId], references: [id])
+  selectedOption   Option      @relation(fields: [selectedOptionId], references: [id])
 }
 
 enum Role {
@@ -33,120 +125,4 @@ enum MemberTier {
   FREE
   PRO
   MAX
-}
-
-model User {
-  id            String      @id @default(uuid())
-  email         String      @unique
-  passwordHash  String
-  role          Role        @default(USER)
-  name          String?
-  mobileNumber  String?
-  dob           DateTime?
-  location      String?
-  category      Category?
-  pwd           Boolean?
-  memberTier    MemberTier  @default(FREE)
-  memberId      String      @unique
-  createdAt     DateTime    @default(now())
-
-  testAttempts  TestAttempt[]
-}
-
-model Subject {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  topics    Topic[]
-}
-
-model Topic {
-  id            String     @id @default(uuid())
-  name          String
-  subjectId     String
-  subject       Subject    @relation(fields: [subjectId], references: [id])
-
-  // Self-relation for sub-topics (e.g. History → Non-Cooperation Movement)
-  parentTopicId String?
-  parentTopic   Topic?     @relation("SubTopics", fields: [parentTopicId], references: [id])
-  subTopics     Topic[]    @relation("SubTopics")
-
-  questions     Question[]
-}
-
-model Question {
-  id          String     @id @default(uuid())
-  text        String
-  imageUrl    String?
-  difficulty  Difficulty
-  explanation String?
-  
-  topicId     String
-  topic       Topic      @relation(fields: [topicId], references: [id])
-  
-  options     Option[]
-  
-  // Implicit many-to-many with Tests if we want to reuse questions across tests
-  tests       Test[]     @relation("TestQuestions")
-  
-  responses   Response[]
-}
-
-model Option {
-  id          String   @id @default(uuid())
-  text        String
-  isCorrect   Boolean  @default(false)
-  
-  questionId  String
-  question    Question @relation(fields: [questionId], references: [id])
-  
-  responses   Response[]
-}
-
-model Test {
-  id             String    @id @default(uuid())
-  title          String
-  duration       Int       // in minutes
-  totalQuestions Int
-  year           Int?      // e.g. 2024 for UPSC Prelims 2024
-  date           DateTime? // exact exam date e.g. 2024-05-26
-  isPublished    Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  
-  questions      Question[] @relation("TestQuestions")
-  
-  attempts       TestAttempt[]
-}
-
-model TestAttempt {
-  id          String    @id @default(uuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  
-  testId      String
-  test        Test      @relation(fields: [testId], references: [id])
-  
-  startTime   DateTime  @default(now())
-  submitTime  DateTime?
-  score       Float?
-  
-  // Status can be derived (if submitTime != null -> COMPLETED), but explicit status helps
-  status      String    @default("ONGOING") // ONGOING, COMPLETED
-  
-  responses   Response[]
-}
-
-model Response {
-  id          String      @id @default(uuid())
-  attemptId   String
-  attempt     TestAttempt @relation(fields: [attemptId], references: [id])
-  
-  questionId  String
-  question    Question    @relation(fields: [questionId], references: [id])
-  
-  selectedOptionId String
-  selectedOption   Option   @relation(fields: [selectedOptionId], references: [id])
-  
-  isCorrect   Boolean
-  timeTaken   Int?        // in seconds (optional for now)
-  markedForReview Boolean  @default(false)
 }
