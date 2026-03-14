@@ -1,0 +1,22 @@
+-- Run this on NODE B (connected to prepapp database)
+-- Replace placeholders before execution:
+--   <NODE_A_HOST>, <NODE_A_PORT>, <DB_NAME>, <REPL_USER>, <REPL_PASSWORD>
+
+-- Create publication for all current tables
+DROP PUBLICATION IF EXISTS pub_b;
+CREATE PUBLICATION pub_b FOR ALL TABLES;
+
+-- Subscribe NODE B to NODE A publication
+DROP SUBSCRIPTION IF EXISTS sub_from_a;
+CREATE SUBSCRIPTION sub_from_a
+CONNECTION 'host=<NODE_A_HOST> port=<NODE_A_PORT> dbname=<DB_NAME> user=<REPL_USER> password=<REPL_PASSWORD>'
+PUBLICATION pub_a
+WITH (
+  copy_data = false,
+  create_slot = true,
+  enabled = true
+);
+
+-- Verify
+SELECT subname, status, received_lsn, latest_end_lsn, latest_end_time
+FROM pg_stat_subscription;
