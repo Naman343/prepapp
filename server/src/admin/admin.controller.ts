@@ -160,6 +160,12 @@ export class AdminController {
       isPublished?: boolean;
     },
   ) {
+    if (body.duration !== undefined && body.duration <= 0) {
+      throw new BadRequestException('Duration must be positive');
+    }
+    if (body.totalQuestions !== undefined && body.totalQuestions <= 0) {
+      throw new BadRequestException('Total questions must be positive');
+    }
     return this.adminService.createTest(body);
   }
 
@@ -234,17 +240,17 @@ export class AdminController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: (_req, _file, cb) => {
+        destination: (_req: any, _file: any, cb: (error: Error | null, destination: string) => void) => {
           const dir = join(process.cwd(), 'uploads');
           if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
           cb(null, dir);
         },
-        filename: (_req, file, cb) => {
+        filename: (_req: any, file: any, cb: (error: Error | null, filename: string) => void) => {
           const unique = crypto.randomBytes(10).toString('hex');
           cb(null, `${unique}${extname(file.originalname)}`);
         },
       }),
-      fileFilter: (_req, file, cb) => {
+      fileFilter: (_req: any, file: any, cb: (error: Error | null, acceptFile: boolean) => void) => {
         if (!file.mimetype.startsWith('image/')) {
           cb(new BadRequestException('Only image files are allowed'), false);
         } else {
@@ -254,7 +260,7 @@ export class AdminController {
       limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
     }),
   )
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
+  uploadImage(@UploadedFile() file: any) {
     if (!file) throw new BadRequestException('No image uploaded');
     return { url: `/uploads/${file.filename}` };
   }

@@ -7,8 +7,8 @@ import { Phone, Mail, MapPin, Instagram, Twitter, Linkedin, Facebook } from "luc
 export function Footer() {
     const pathname = usePathname()
     
-    // Do not show footer during exams
-    if (pathname?.startsWith('/exam')) return null
+    // Do not show footer during exams or on admin pages
+    if (pathname?.startsWith('/exam') || pathname?.startsWith('/admin')) return null
     
     return (
         <footer className="bg-zinc-950 text-zinc-400 py-16 px-6 border-t border-zinc-900 mt-auto">
