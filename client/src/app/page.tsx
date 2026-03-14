@@ -168,15 +168,6 @@ export default function Home() {
           </div>
         )}
       </main>
-
-      <footer className="py-12 px-6 border-t mt-auto">
-        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col items-center md:items-start border-l-4 border-foreground pl-4">
-            <span className="text-xl font-black text-foreground tracking-tighter">PrepApp</span>
-          </div>
-          <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026</p>
-        </div>
-      </footer>
     </div>
   )
 }

@@ -249,10 +249,6 @@ export default function TestsPage() {
                     </div>
                 )}
             </div>
-
-            <footer className="py-10 px-6 border-t mt-auto text-center">
-                <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest">© 2026 PrepApp — All Rights Reserved</p>
-            </footer>
         </div>
     )
 }
