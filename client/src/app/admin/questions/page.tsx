@@ -266,48 +266,48 @@ function QuestionForm({
           />
         </div>
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label>Topic</Label>
-            <button
-              type="button"
-              className="text-xs text-blue-600 hover:underline"
-              onClick={() => { setNewTopicMode((v) => !v); setNewTopicName(""); setNewTopicSubjectId(""); setNewSubtopicMode(false) }}
-            >
-              {newTopicMode ? "← Pick existing" : "+ Create new"}
-            </button>
-          </div>
-          {newTopicMode ? (
-            <div className="space-y-2">
-              <select
-                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-                value={newTopicSubjectId}
-                onChange={(e) => setNewTopicSubjectId(e.target.value)}
-              >
-                <option value="">Select subject...</option>
-                {subjects.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-              <Input
-                placeholder="New topic name..."
-                value={newTopicName}
-                onChange={(e) => setNewTopicName(e.target.value)}
-              />
-            </div>
-          ) : (
-            <select
-              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-              value={topicId}
+          <Label>Topic</Label>
+          <div className="relative">
+            <Input
+              list="topic-list"
+              placeholder="Type to search or add new topic..."
+              value={newTopicMode ? newTopicName : (parentTopics.find((t) => t.id === topicId)?.name ?? "")}
               onChange={(e) => {
-                setTopicId(e.target.value)
-                setSubTopicId("")
+                const val = e.target.value
+                const match = parentTopics.find((t) => t.name.toLowerCase() === val.toLowerCase())
+                if (match) {
+                  setTopicId(match.id)
+                  setSubTopicId("")
+                  setNewTopicMode(false)
+                  setNewTopicName("")
+                } else {
+                  setNewTopicMode(true)
+                  setNewTopicName(val)
+                  setTopicId("")
+                  setSubTopicId("")
+                }
               }}
-            >
-              <option value="">Select topic...</option>
+            />
+            <datalist id="topic-list">
               {parentTopics.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.subject.name} — {t.name}
-                </option>
+                <option key={t.id} value={t.name} />
+              ))}
+            </datalist>
+          </div>
+          {newTopicMode && newTopicName.trim() && (
+            <p className="text-xs text-blue-600">
+              ✨ New topic &quot;{newTopicName.trim()}&quot; will be created on save
+            </p>
+          )}
+          {newTopicMode && newTopicName.trim() && (
+            <select
+              className="w-full h-9 rounded-md border border-input bg-background px-3 text-xs"
+              value={newTopicSubjectId}
+              onChange={(e) => setNewTopicSubjectId(e.target.value)}
+            >
+              <option value="">Select subject for new topic...</option>
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
           )}
@@ -315,38 +315,37 @@ function QuestionForm({
       </div>
 
       <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
-          <Label>Subtopic <span className="text-muted-foreground">(optional)</span></Label>
-          {(newTopicMode || topicId) && (
-            <button
-              type="button"
-              className="text-xs text-blue-600 hover:underline"
-              onClick={() => { setNewSubtopicMode((v) => !v); setNewSubtopicName("") }}
-            >
-              {newSubtopicMode ? "← Pick existing" : "+ Create new"}
-            </button>
-          )}
-        </div>
-        {newSubtopicMode ? (
+        <Label>Subtopic <span className="text-muted-foreground">(optional)</span></Label>
+        <div className="relative">
           <Input
-            placeholder="New subtopic name..."
-            value={newSubtopicName}
-            onChange={(e) => setNewSubtopicName(e.target.value)}
+            list="subtopic-list"
+            placeholder={!topicId && !newTopicMode ? "Select a topic first..." : "Type to search or add new subtopic..."}
+            disabled={!topicId && !newTopicMode}
+            value={newSubtopicMode ? newSubtopicName : (subTopics.find((st) => st.id === subTopicId)?.name ?? "")}
+            onChange={(e) => {
+              const val = e.target.value
+              const match = subTopics.find((st) => st.name.toLowerCase() === val.toLowerCase())
+              if (match) {
+                setSubTopicId(match.id)
+                setNewSubtopicMode(false)
+                setNewSubtopicName("")
+              } else {
+                setNewSubtopicMode(true)
+                setNewSubtopicName(val)
+                setSubTopicId("")
+              }
+            }}
           />
-        ) : (
-          <select
-            className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-            value={subTopicId}
-            onChange={(e) => setSubTopicId(e.target.value)}
-            disabled={newTopicMode || !topicId || subTopics.length === 0}
-          >
-            <option value="">No subtopic</option>
+          <datalist id="subtopic-list">
             {subTopics.map((st) => (
-              <option key={st.id} value={st.id}>
-                {st.name}
-              </option>
+              <option key={st.id} value={st.name} />
             ))}
-          </select>
+          </datalist>
+        </div>
+        {newSubtopicMode && newSubtopicName.trim() && (
+          <p className="text-xs text-blue-600">
+            ✨ New subtopic &quot;{newSubtopicName.trim()}&quot; will be created on save
+          </p>
         )}
       </div>
 
@@ -477,7 +476,7 @@ export default function QuestionsPage() {
         >
           <option value="">All topics</option>
           {filterParentTopics.map((t) => (
-            <option key={t.id} value={t.id}>{t.subject.name} — {t.name}</option>
+            <option key={t.id} value={t.id}>{t.name}</option>
           ))}
         </select>
         <select
@@ -592,7 +591,7 @@ export default function QuestionsPage() {
                   </div>
 
                   <div className="text-xs text-muted-foreground">
-                    {q.topic.subject.name} › {q.topic.name}
+                    {q.topic.name}
                   </div>
 
                   {q.imageUrl && (
