@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import api from "@/lib/axios"
 import { Clock, FileQuestion, ArrowRight, Lock, Calendar } from "lucide-react"
@@ -22,7 +22,7 @@ interface Test {
 
 type ActiveTab = "pyq" | "mock"
 
-export default function TestsPage() {
+function TestsContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [tests, setTests] = useState<Test[]>([])
@@ -250,5 +250,23 @@ export default function TestsPage() {
                 )}
             </div>
         </div>
+    )
+}
+
+export default function TestsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-muted/20">
+                <Navbar />
+                <div className="container mx-auto p-12 flex justify-center">
+                    <div className="animate-pulse flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 bg-muted rounded-3xl" />
+                        <div className="h-5 w-40 bg-muted rounded-full" />
+                    </div>
+                </div>
+            </div>
+        }>
+            <TestsContent />
+        </Suspense>
     )
 }
