@@ -9,7 +9,14 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');
-  app.enableCors();
+  app.enableCors({
+    origin: [
+      'http://localhost:3000',
+      'https://prepapp-kappa.vercel.app',
+      process.env.FRONTEND_URL
+    ].filter(Boolean) as string[],
+    credentials: true,
+  });
 
   // Ensure uploads directory exists and serve it as static files
   const uploadsDir = join(process.cwd(), 'uploads');
