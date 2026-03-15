@@ -15,7 +15,7 @@ interface Test {
     isPublished: boolean
     year: number | null
     date: string | null
-    status?: string
+    status?: "NOT_STARTED" | "ONGOING" | "COMPLETED"
     lastAttemptId?: string
     score?: number
 }
@@ -43,10 +43,10 @@ export default function TestsPage() {
     const fetchTests = async () => {
         try {
             const token = localStorage.getItem("token")
-            const res = token
+            const res = token 
                 ? await api.get("/tests/status")
                 : await api.get("/tests")
-
+            
             const data: Test[] = res.data
             setTests(data)
         } catch (error) {
@@ -74,15 +74,15 @@ export default function TestsPage() {
     const pyqTests = tests.filter(t => t.year !== null)
     const mockTests = tests.filter(t => t.year === null)
     const pyqYears = [...new Set(pyqTests.map(t => t.year as number))].sort((a, b) => b - a)
-    const visiblePyqTests = selectedYear === "all"
-        ? pyqTests
+    const visiblePyqTests = selectedYear === "all" 
+        ? pyqTests 
         : (selectedYear !== null ? pyqTests.filter(t => t.year === selectedYear) : pyqTests)
 
     const TestRow = ({ test }: { test: Test }) => (
         <div className="flex items-center justify-between gap-4 py-5 px-6 bg-background border border-border/60 rounded-2xl hover:border-foreground/30 hover:shadow-md transition-all duration-200">
             <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                    <p className="text-base font-black text-foreground leading-snug">{test.title}</p>
+                <div className="flex items-center gap-3 mb-2">
+                    <p className="text-base font-black text-foreground leading-snug truncate">{test.title}</p>
                     {test.status === "COMPLETED" && (
                         <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest rounded border border-emerald-100">
                             DONE
@@ -103,7 +103,7 @@ export default function TestsPage() {
                         <span className="text-[10px] font-black border border-current rounded px-0.5">M</span>
                         {test.totalQuestions * 2} Marks
                     </span>
-                    <span className="flex items-center gap-1.5 text-red-600">
+                    <span className="flex items-center gap-1.5 font-bold text-red-600">
                         <Clock className="w-3.5 h-3.5" />
                         {test.duration} Mins
                     </span>
@@ -131,8 +131,8 @@ export default function TestsPage() {
             >
                 <div className={cn(
                     "w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-sm group-hover:shadow-md",
-                    starting === test.id
-                        ? "bg-muted"
+                    starting === test.id 
+                        ? "bg-muted" 
                         : test.status === "COMPLETED"
                             ? "bg-blue-600 group-hover:bg-blue-700 group-hover:-translate-y-0.5"
                             : "bg-foreground group-hover:bg-zinc-800 group-hover:-translate-y-0.5"
@@ -202,8 +202,8 @@ export default function TestsPage() {
                                         className={cn(
                                             "px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md",
                                             selectedYear === "all"
-                                                ? "bg-foreground text-background border-foreground"
-                                                : "bg-background text-foreground border-foreground hover:bg-foreground hover:text-background"
+                                                ? "bg-red-600 text-white border-red-600"
+                                                : "bg-background text-foreground border-foreground hover:bg-red-600 hover:text-white hover:border-red-600"
                                         )}
                                     >
                                         All Years
