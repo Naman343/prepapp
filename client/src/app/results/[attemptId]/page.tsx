@@ -296,4 +296,3 @@ export default function ResultPage({ params }: { params: Promise<{ attemptId: st
         </div>
     )
 }
-}
