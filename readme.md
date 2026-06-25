@@ -10,7 +10,3 @@ npm run dev
 cd c:\Users\siddh\Desktop\prepapp\server
 npx prisma migrate 
 
-.env
-DATABASE_URL="postgresql://postgres:Missionpostgres@localhost:5432/prepapp"
-JWT_SECRET="prepapp_jwt_secret_change_in_production"
-PORT=5000
