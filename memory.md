@@ -44,8 +44,8 @@ This file serves as a memory log of the context, credentials, architecture, and 
 
 ## 5. Development Status
 
-*   **NestJS Backend Dev Server:** Stopped.
-*   **Next.js Frontend Dev Server:** Stopped.
+*   **NestJS Backend Dev Server:** Running as a background task.
+*   **Next.js Frontend Dev Server:** Running as a background task.
 
 ---
 
