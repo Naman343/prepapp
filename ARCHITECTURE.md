@@ -81,6 +81,14 @@ prepapp/
 │   │   │   ├── auth/
 │   │   │   │   ├── login/page.tsx     # /auth/login
 │   │   │   │   └── signup/page.tsx    # /auth/signup
+│   │   │   ├── admin/                 # /admin — admin dashboards
+│   │   │   │   ├── page.tsx           # Admin home
+│   │   │   │   ├── layout.tsx         # Admin navbar + sidebar layout
+│   │   │   │   ├── import/page.tsx    # Bulk JSON import
+│   │   │   │   ├── pdf-extractor/page.tsx # PDF extraction settings
+│   │   │   │   ├── questions/page.tsx # CRUD questions
+│   │   │   │   ├── subjects/page.tsx  # CRUD subjects
+│   │   │   │   └── tests/page.tsx     # CRUD tests
 │   │   │   ├── tests/page.tsx         # /tests — browse & start tests
 │   │   │   ├── exam/
 │   │   │   │   └── [attemptId]/page.tsx  # /exam/:attemptId — live exam
@@ -120,6 +128,10 @@ prepapp/
     │   │   ├── auth.service.ts        # validateUser, login, register
     │   │   ├── local.strategy.ts      # Passport Local (username+password)
     │   │   └── jwt.strategy.ts        # Passport JWT (Bearer token)
+    │   ├── admin/                     # Administration module
+    │   │   ├── admin.module.ts
+    │   │   ├── admin.controller.ts    # Admin CRUD, Stats, PDF extract routes
+    │   │   └── admin.service.ts       # bulkImport, extractPdf Logic
     │   ├── exam/                      # Exam engine module
     │   │   ├── exam.module.ts
     │   │   ├── exam.controller.ts     # Exam CRUD endpoints (JWT guarded)
@@ -176,18 +188,28 @@ Subject ──< Topic ──< Question ──< Option
 
 ```
 User
-  id           String        PK
-  email        String        unique
-  passwordHash String
-  role         Role          USER | ADMIN
-  createdAt    DateTime
-  attempts     TestAttempt[]
+  id            String        PK
+  email         String        unique
+  passwordHash  String
+  role          Role          USER | ADMIN
+  name          String?
+  mobileNumber  String?
+  dob           DateTime?
+  location      String?
+  category      Category?     GEN | EWS | OBC | SC | ST
+  pwd           Boolean?
+  memberTier    MemberTier    FREE | PRO | MAX
+  memberId      String        unique
+  createdAt     DateTime
+  attempts      TestAttempt[]
 
 Test
   id              String    PK
   title           String
   duration        Int       (minutes)
   totalQuestions  Int
+  year            Int?
+  date            DateTime?
   isPublished     Boolean
   createdAt       DateTime
   attempts        TestAttempt[]
@@ -199,14 +221,15 @@ TestAttempt
   testId      String          FK → Test
   startTime   DateTime
   submitTime  DateTime?
-  score       Int?
-  status      AttemptStatus   ONGOING | COMPLETED
+  score       Float?
+  status      String          (ONGOING | COMPLETED)
   responses   Response[]
 
 Question
   id          String      PK
   text        String
   imageUrl    String?
+  examYear    Int?
   difficulty  Difficulty  EASY | MEDIUM | HARD
   explanation String?
   topicId     String      FK → Topic
@@ -223,24 +246,23 @@ Response
   id               String    PK
   attemptId        String    FK → TestAttempt
   questionId       String    FK → Question
-  selectedOptionId String?   FK → Option
+  selectedOptionId String    FK → Option
   isCorrect        Boolean
   timeTaken        Int?      (seconds)
   markedForReview  Boolean
 
 Topic
-  id        String     PK
-  name      String
-  subjectId String     FK → Subject
-  questions Question[]
+  id            String     PK
+  name          String
+  subjectId     String     FK → Subject
+  parentTopicId String?    FK → Topic (Self-relation)
+  questions     Question[]
 
 Subject
   id     String  PK
   name   String
   topics Topic[]
 ```
-
----
 
 ## 5. Backend Architecture
 
@@ -257,7 +279,9 @@ AppModule
 │     └── uses PrismaService
 ├── ExamModule
 │     └── uses PrismaService
-└── AnalyticsModule
+├── AnalyticsModule
+│     └── uses PrismaService
+└── AdminModule
       └── uses PrismaService
 ```
 
@@ -270,7 +294,7 @@ HTTP Request
 NestJS Router
     │
     ▼
-Guards (JwtAuthGuard / LocalAuthGuard)
+Guards (JwtAuthGuard / LocalAuthGuard / RolesGuard)
     │
     ▼
 Pipes (GlobalValidationPipe → class-validator)
@@ -297,6 +321,7 @@ JSON Response
 | `TestsService`     | Full CRUD; returns only published tests to normal users                     |
 | `QuestionsService` | CRUD with nested `Option` creation                                          |
 | `AnalyticsService` | Aggregates completed attempts; computes accuracy + topic-wise STRONG/MODERATE/WEAK breakdown |
+| `AdminService`     | CRUD for admin components, stats computation, bulk import database transaction, and PDF extraction proxy |
 
 ---
 
@@ -313,6 +338,11 @@ JSON Response
 /results/[attemptId] → Post-exam results review
 /analytics           → Personal performance dashboard
 /profile             → User profile page
+/admin               → Admin portal dashboard homepage
+/admin/subjects      → CRUD management of exam subjects
+/admin/tests         → CRUD management of mock tests
+/admin/questions     → CRUD management of exam questions & options
+/admin/import        → Bulk JSON seeder & PDF extractor tool
 ```
 
 ### Component Hierarchy (Exam Page)
@@ -383,6 +413,31 @@ Every page that needs auth reads `localStorage.token` and `localStorage.user` di
 | Method | Path             | Guard | Description                    |
 |--------|------------------|-------|--------------------------------|
 | GET    | `/api/analytics` | JWT   | User stats + topic breakdown   |
+
+### Admin Panel
+| Method | Path | Guard | Description |
+|--------|------|-------|-------------|
+| GET | `/api/admin/stats` | JWT + Admin | Fetch system stats (counts) |
+| GET | `/api/admin/subjects` | JWT + Admin | Get all subjects |
+| POST | `/api/admin/subjects` | JWT + Admin | Create a new subject |
+| DELETE | `/api/admin/subjects/:id` | JWT + Admin | Delete a subject |
+| GET | `/api/admin/topics` | JWT + Admin | Get all topics |
+| POST | `/api/admin/topics` | JWT + Admin | Create a new topic |
+| DELETE | `/api/admin/topics/:id` | JWT + Admin | Delete a topic |
+| GET | `/api/admin/questions` | JWT + Admin | Get paginated admin questions |
+| POST | `/api/admin/questions` | JWT + Admin | Create a question & options |
+| PATCH | `/api/admin/questions/:id` | JWT + Admin | Update a question & options |
+| DELETE | `/api/admin/questions/:id` | JWT + Admin | Delete a question |
+| GET | `/api/admin/tests` | JWT + Admin | Get all tests |
+| POST | `/api/admin/tests` | JWT + Admin | Create a new test |
+| PATCH | `/api/admin/tests/:id` | JWT + Admin | Update a test |
+| DELETE | `/api/admin/tests/:id` | JWT + Admin | Delete a test |
+| GET | `/api/admin/tests/:id/questions` | JWT + Admin | Get questions in a test |
+| POST | `/api/admin/tests/:id/questions` | JWT + Admin | Add questions to a test |
+| DELETE | `/api/admin/tests/:testId/questions/:questionId` | JWT + Admin | Remove question from test |
+| POST | `/api/admin/import/extract-pdf` | JWT + Admin | Parse PDF to JSON (via pdftojson proxy) |
+| POST | `/api/admin/import` | JWT + Admin | Bulk seed test + questions in transaction |
+| POST | `/api/admin/upload-image` | JWT + Admin | Upload image assets for questions |
 
 ---
 
