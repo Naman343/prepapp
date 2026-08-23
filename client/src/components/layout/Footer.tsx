@@ -17,7 +17,7 @@ export function Footer() {
                     {/* Brand & Contact Column */}
                     <div className="space-y-6">
                         <div className="flex flex-col">
-                            <span className="text-2xl font-black text-white tracking-tighter">PrepApp</span>
+                            <span className="text-2xl font-black text-white tracking-tighter">PrepApp AI</span>
                             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] mt-1">UPSC Preparation Platform</span>
                         </div>
                         <div className="space-y-4">

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState, useRef } from "react"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { User, Search, X } from "lucide-react"
 
@@ -13,13 +14,17 @@ interface UserData {
 }
 
 export function Navbar() {
+    const pathname = usePathname()
     const [user, setUser] = useState<UserData | null>(null)
     const [searchOpen, setSearchOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
     const [debouncedQuery, setDebouncedQuery] = useState("")
     const inputRef = useRef<HTMLInputElement>(null)
 
+    const [mounted, setMounted] = useState(false)
+
     useEffect(() => {
+        setMounted(true)
         const userData = localStorage.getItem("user")
         if (userData) {
             setUser(JSON.parse(userData))
@@ -133,12 +138,24 @@ export function Navbar() {
                             </div>
                         ) : (
                             <div className="flex items-center gap-3">
-                                <Link href="/auth/login">
-                                    <Button variant="ghost" className="font-bold text-sm tracking-tight px-6 h-11 rounded-xl hover:bg-black/5 text-black transition-all duration-200">Login</Button>
-                                </Link>
-                                <Link href="/auth/signup">
-                                    <Button className="bg-black hover:bg-black/85 text-white font-black text-sm tracking-tight px-8 h-11 rounded-xl active:scale-95 transition-all">Sign Up</Button>
-                                </Link>
+                                {mounted && pathname === "/auth/login" ? (
+                                    <span className="bg-black text-white font-black text-sm tracking-tight px-6 py-2.5 rounded-xl select-none leading-none">
+                                        Login
+                                    </span>
+                                ) : mounted && pathname === "/auth/signup" ? (
+                                    <span className="bg-black text-white font-black text-sm tracking-tight px-6 py-2.5 rounded-xl select-none leading-none">
+                                        Sign Up
+                                    </span>
+                                ) : (
+                                    <>
+                                        <Link href="/auth/login">
+                                            <Button variant="ghost" className="font-bold text-sm tracking-tight px-6 h-11 rounded-xl hover:bg-black/5 text-black transition-all duration-200">Login</Button>
+                                        </Link>
+                                        <Link href="/auth/signup">
+                                            <Button className="bg-black hover:bg-black/85 text-white font-black text-sm tracking-tight px-8 h-11 rounded-xl active:scale-95 transition-all">Sign Up</Button>
+                                        </Link>
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>
