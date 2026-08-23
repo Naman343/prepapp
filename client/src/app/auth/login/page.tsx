@@ -34,6 +34,30 @@ export default function LoginPage() {
         }
     }
 
+    const handleGoogleLogin = async () => {
+        setLoading(true)
+        setError("")
+        
+        const emailInput = window.prompt("Enter Google Email for simulation:", "aspirant.google@example.com")
+        if (!emailInput) {
+            setLoading(false)
+            return
+        }
+        const nameInput = window.prompt("Enter Name for simulation:", "UPSC Aspirant") || undefined
+        
+        try {
+            const res = await api.post("/auth/google", { email: emailInput, name: nameInput })
+            localStorage.setItem("token", res.data.access_token)
+            localStorage.setItem("user", JSON.stringify(res.data.user))
+            router.push("/")
+        } catch (err: unknown) {
+            const error = err as { response?: { data?: { message?: string } } }
+            setError(error.response?.data?.message || "Google Login failed")
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <div className="min-h-screen bg-white flex flex-col font-sans">
             {/* Navbar */}
@@ -123,7 +147,7 @@ export default function LoginPage() {
 
                             {/* Google & OTP Buttons */}
                             <div className="grid grid-cols-2 gap-3">
-                                <button type="button" className="h-11 border border-black/20 hover:border-black rounded-lg bg-white flex items-center justify-center gap-2 transition-colors text-xs font-bold text-black">
+                                <button onClick={handleGoogleLogin} type="button" className="h-11 border border-black/20 hover:border-black rounded-lg bg-white flex items-center justify-center gap-2 transition-colors text-xs font-bold text-black">
                                     <span className="w-4 h-4 flex items-center justify-center text-xs font-black bg-[#f5c842]/20 text-[#f5c842] rounded-full shrink-0">G</span>
                                     Google
                                 </button>

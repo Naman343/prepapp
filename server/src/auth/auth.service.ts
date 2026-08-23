@@ -108,4 +108,16 @@ export class AuthService {
     });
     return updated;
   }
+
+  async googleLogin(email: string, name?: string) {
+    let user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      const hashedPassword = await bcrypt.hash(randomBytes(16).toString('hex'), 10);
+      const memberId = randomBytes(6).toString('hex');
+      user = await this.prisma.user.create({
+        data: { email, name, passwordHash: hashedPassword, memberId },
+      });
+    }
+    return this.login({ id: user.id, email: user.email, role: user.role });
+  }
 }
