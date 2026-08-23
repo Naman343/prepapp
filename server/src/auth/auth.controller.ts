@@ -21,6 +21,11 @@ export class AuthController {
     return this.authService.register(body.email, body.password);
   }
 
+  @Post('google')
+  async google(@Body() body: { email: string; name?: string }) {
+    return this.authService.googleLogin(body.email, body.name);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   async me(@Req() req: Request & { user?: { userId: string; email: string; role: string } }) {

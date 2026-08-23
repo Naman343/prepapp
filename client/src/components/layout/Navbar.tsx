@@ -105,7 +105,7 @@ export function Navbar() {
             <header className="border-b border-black/10 bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
                 <div className="container mx-auto px-6 h-20 flex items-center justify-between">
                     <Link href="/" className="flex flex-col group active:scale-95 transition-transform">
-                        <span className="text-2xl font-black text-foreground tracking-tighter">PrepApp</span>
+                        <span className="text-2xl font-black text-foreground tracking-tighter">PrepApp AI</span>
                     </Link>
 
                     <div className="flex items-center gap-6">
@@ -114,6 +114,8 @@ export function Navbar() {
                                 <Link href="/tests?tab=pyq" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">PYQ Tests</Link>
                                 <Link href="/tests?tab=mock" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">Mock Tests</Link>
                                 <Link href="/analytics" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">My Performance</Link>
+                                <Link href="/current-affairs" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">Current Affairs</Link>
+                                <Link href="/notes" className="hover:text-blue-600 transition-colors py-2 border-b-2 border-transparent hover:border-blue-600">Notes</Link>
                                 <button
                                     className="hover:text-blue-600 transition-colors py-2"
                                     title="Search"
