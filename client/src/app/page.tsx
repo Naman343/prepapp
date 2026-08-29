@@ -260,7 +260,7 @@ export default function Home() {
               <div className="border-2 border-dashed border-black/20 rounded-3xl p-8 flex flex-col items-center justify-center text-center gap-4 hover:border-black/40 transition-colors">
                 <h3 className="text-xl font-black text-black">Ready to start?</h3>
                 <p className="text-black/50 font-medium text-sm">Begin your journey today</p>
-                <Link href="/tests">
+                <Link href="/curriculum">
                   <button className="inline-flex items-center gap-2 h-11 px-8 bg-black text-white rounded-xl font-black text-sm hover:bg-black/85 active:scale-95 transition-all duration-200">
                     Explore Curriculum
                   </button>

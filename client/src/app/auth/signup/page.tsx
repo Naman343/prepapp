@@ -9,7 +9,8 @@ import { ArrowRight, BarChart3, Zap, Lock, AtSign, Eye, EyeOff, BookOpen, Calend
 
 export default function SignupPage() {
     const router = useRouter()
-    const [fullName, setFullName] = useState("")
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [targetYear, setTargetYear] = useState("")
@@ -24,7 +25,7 @@ export default function SignupPage() {
         setError("")
 
         try {
-            await api.post("/auth/signup", { email, password })
+            await api.post("/auth/signup", { email, password, firstName, lastName })
             router.push("/auth/login") // Redirect to login
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } }
@@ -43,10 +44,11 @@ export default function SignupPage() {
             setLoading(false)
             return
         }
-        const nameInput = window.prompt("Enter Name for simulation:", "UPSC Aspirant") || undefined
+        const firstNameInput = window.prompt("Enter First Name for simulation:", "UPSC") || ""
+        const lastNameInput = window.prompt("Enter Last Name for simulation:", "Aspirant") || ""
         
         try {
-            const res = await api.post("/auth/google", { email: emailInput, name: nameInput })
+            const res = await api.post("/auth/google", { email: emailInput, firstName: firstNameInput, lastName: lastNameInput })
             localStorage.setItem("token", res.data.access_token)
             localStorage.setItem("user", JSON.stringify(res.data.user))
             router.push("/")
@@ -177,20 +179,36 @@ export default function SignupPage() {
 
                             {/* Form */}
                             <form onSubmit={handleSignup} className="space-y-4">
-                                {/* Full name */}
-                                <div className="space-y-2">
-                                    <label htmlFor="fullName" className="text-xs font-black text-black uppercase tracking-wider">Full name</label>
-                                    <div className="relative flex items-center">
-                                        <User className="absolute left-3 w-4 h-4 text-black/30 pointer-events-none" />
-                                        <input
-                                            id="fullName"
-                                            type="text"
-                                            placeholder="Enter your full name"
-                                            value={fullName}
-                                            onChange={(e) => setFullName(e.target.value)}
-                                            required
-                                            className="w-full h-12 pl-10 pr-4 bg-white border border-black/20 rounded-lg focus:border-black focus:outline-none transition-colors text-sm font-medium text-black placeholder:text-black/30"
-                                        />
+                                {/* First Name & Last Name */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label htmlFor="firstName" className="text-xs font-black text-black uppercase tracking-wider">First name</label>
+                                        <div className="relative flex items-center">
+                                            <User className="absolute left-3 w-4 h-4 text-black/30 pointer-events-none" />
+                                            <input
+                                                id="firstName"
+                                                type="text"
+                                                placeholder="First name"
+                                                value={firstName}
+                                                onChange={(e) => setFirstName(e.target.value)}
+                                                required
+                                                className="w-full h-12 pl-10 pr-4 bg-white border border-black/20 rounded-lg focus:border-black focus:outline-none transition-colors text-sm font-medium text-black placeholder:text-black/30"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label htmlFor="lastName" className="text-xs font-black text-black uppercase tracking-wider">Last name</label>
+                                        <div className="relative flex items-center">
+                                            <User className="absolute left-3 w-4 h-4 text-black/30 pointer-events-none" />
+                                            <input
+                                                id="lastName"
+                                                type="text"
+                                                placeholder="Last name"
+                                                value={lastName}
+                                                onChange={(e) => setLastName(e.target.value)}
+                                                className="w-full h-12 pl-10 pr-4 bg-white border border-black/20 rounded-lg focus:border-black focus:outline-none transition-colors text-sm font-medium text-black placeholder:text-black/30"
+                                            />
+                                        </div>
                                     </div>
                                 </div>
 
