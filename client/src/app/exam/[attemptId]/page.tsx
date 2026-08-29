@@ -233,7 +233,7 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                     </button>
                 </div>
 
-                <div className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-8 py-8">
+                <div className="flex-1 w-full px-4 sm:px-8 py-8">
                     {/* Test header */}
                     <div className="mb-6">
                         <h1 className="text-2xl font-black text-gray-900 mb-1">{testTitle}</h1>
@@ -388,11 +388,10 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
             </header>
 
             {/* Main Content Layout */}
-            <div className="flex-1 flex overflow-hidden container-fluid max-w-400 mx-auto w-full">
+            <div className="flex-1 flex overflow-hidden w-full">
                 {/* Left Area: Question Area */}
                 <div className="flex-1 flex flex-col relative min-w-0">
-                    <div className="flex-1 p-4 md:p-6 overflow-y-auto pb-24">
-                        <div className="max-w-4xl mx-auto">
+                    <div className="flex-1 p-4 md:p-6 overflow-y-auto pb-24 w-full">
                             <QuestionCard
                                 question={currentQuestion}
                                 questionNumber={currentIndex + 1}
@@ -404,7 +403,7 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
 
                     {/* Fixed Action Footer */}
                     <footer className="absolute bottom-0 left-0 right-0 h-16 bg-background border-t shadow-2xl z-40 flex items-center px-3 md:px-6 border-r border-border/50">
-                        <div className="max-w-4xl w-full mx-auto flex items-center justify-between gap-2 md:gap-4">
+                        <div className="w-full flex items-center justify-between gap-2 md:gap-4">
                             <div className="flex gap-2">
                                 <Button
                                     variant="outline"
@@ -466,7 +465,7 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                 {/* Right Sidebar: Palette */}
                 <div className={cn(
                     "bg-background border-l border-border/50 flex flex-col z-50 transition-transform duration-300 ease-in-out",
-                    "fixed top-16 right-0 bottom-0 w-[320px]",
+                    "fixed top-16 right-0 bottom-0 w-[90vw] max-w-[320px]",
                     "lg:relative lg:top-auto lg:bottom-auto lg:w-95 lg:translate-x-0",
                     showPalette ? "translate-x-0" : "translate-x-full"
                 )}>

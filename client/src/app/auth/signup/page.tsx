@@ -65,7 +65,7 @@ export default function SignupPage() {
 
             {/* Main Content */}
             <main className="flex-grow flex items-center justify-center py-12 px-6">
-                <div className="container mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                     
                     {/* Left Column: Branding / Info */}
                     <div className="lg:col-span-6 space-y-8">

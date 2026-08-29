@@ -178,7 +178,7 @@ function TestsContent() {
         <div className="min-h-screen bg-muted/20 flex flex-col font-sans">
             <Navbar />
 
-            <div className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12">
+            <div className="flex-1 w-full px-4 sm:px-6 py-8 sm:py-12">
 
                 {/* Page header */}
                 <div className="mb-8 border-l-4 border-foreground pl-5">

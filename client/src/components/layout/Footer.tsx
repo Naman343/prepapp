@@ -11,8 +11,8 @@ export function Footer() {
     if (pathname?.startsWith('/exam') || pathname?.startsWith('/admin')) return null
     
     return (
-        <footer className="bg-zinc-950 text-zinc-400 py-16 px-6 border-t border-zinc-900 mt-auto">
-            <div className="container mx-auto max-w-7xl">
+        <footer className="bg-zinc-950 text-zinc-400 py-16 px-6 border-t border-zinc-900 mt-auto w-full">
+            <div className="w-full max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
                     {/* Brand & Contact Column */}
                     <div className="space-y-6">

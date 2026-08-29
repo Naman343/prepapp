@@ -74,7 +74,7 @@ export function TestSlider() {
             <div className="w-full mb-12">
                 <div className="flex gap-6 overflow-hidden">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="min-w-[350px] h-48 bg-muted animate-pulse rounded-4xl" />
+                        <div key={i} className="min-w-[280px] md:min-w-[320px] lg:min-w-[350px] h-48 bg-muted animate-pulse rounded-4xl" />
                     ))}
                 </div>
             </div>
@@ -117,7 +117,7 @@ export function TestSlider() {
                 className="flex gap-6 overflow-x-auto pb-4 scroll-smooth no-scrollbar snap-x snap-mandatory"
             >
                 {tests.map((test) => (
-                    <div key={test.id} className="min-w-[210px] md:min-w-[240px] snap-start">
+                    <div key={test.id} className="min-w-[180px] md:min-w-[210px] lg:min-w-[240px] snap-start">
                         <Card className="group/card relative overflow-hidden bg-white border border-border/60 hover:border-black transition-all duration-500 rounded-[2rem] h-full shadow-[0_4px_15px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_30px_-10px_rgba(0,0,0,0.1)] active:scale-[0.98] flex flex-col">
                             
                             <CardContent className="p-5 pb-4 flex-1 relative z-10 flex flex-col justify-between">

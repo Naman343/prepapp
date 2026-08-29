@@ -102,8 +102,8 @@ export function Navbar() {
                 </div>
             )}
 
-            <header className="border-b border-black/10 bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
-                <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+            <header className="border-b border-black/10 bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 w-full">
+                <div className="w-full px-6 h-20 flex items-center justify-between">
                     <Link href="/" className="flex flex-col group active:scale-95 transition-transform">
                         <span className="text-2xl font-black text-foreground tracking-tighter">PrepApp AI</span>
                     </Link>

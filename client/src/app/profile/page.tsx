@@ -102,7 +102,7 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen bg-muted/20">
             <Navbar />
-            <main className="container mx-auto px-6 py-10 max-w-5xl">
+            <main className="w-full px-6 py-10">
                 <div className="mb-8">
                     <p className="text-[10px] uppercase font-bold text-blue-600 tracking-[0.3em] mb-1">ACCOUNT</p>
                     <h1 className="text-3xl font-black tracking-tight">My Account</h1>

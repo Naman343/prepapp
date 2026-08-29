@@ -82,7 +82,7 @@ export default function ResultPage({ params }: { params: Promise<{ attemptId: st
     return (
         <div className="min-h-screen bg-muted/20 flex flex-col font-sans mb-20 md:mb-0">
             <Navbar />
-            <div className="flex-1 container mx-auto px-6 py-12 max-w-7xl animate-in fade-in duration-500">
+            <div className="flex-1 w-full px-6 py-12 animate-in fade-in duration-500">
                 <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-l-4 border-foreground pl-6">
                     <div>
                         <h2 className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.3em] mb-2">SCORECARD RECAP</h2>

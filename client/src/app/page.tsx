@@ -57,7 +57,7 @@ export default function Home() {
       <div className="min-h-screen bg-white flex flex-col font-sans">
         <Navbar />
         <main className="flex-1 flex flex-col">
-          <div className="container mx-auto px-6 py-8 max-w-7xl animate-in fade-in duration-500">
+          <div className="w-full px-6 py-8 animate-in fade-in duration-500">
             <header className="mb-10">
               <p className="text-[10px] uppercase font-bold text-black/40 tracking-[0.3em] mb-2">DASHBOARD</p>
               <h1 className="text-4xl md:text-5xl font-black tracking-tight text-black">
@@ -159,7 +159,7 @@ export default function Home() {
 
         {/* ── Stats Bar ── */}
         <section className="bg-black text-white py-10 px-6">
-          <div className="container mx-auto max-w-7xl flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div className="w-full px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/40 mb-2">The Aspirant Community</p>
               <h2 className="text-2xl md:text-3xl font-black tracking-tight">Join the 10,000+ Students on the Waitlist</h2>
@@ -179,7 +179,7 @@ export default function Home() {
 
         {/* ── Features Section ── */}
         <section className="px-6 py-24 bg-white">
-          <div className="container mx-auto max-w-7xl">
+          <div className="w-full">
             {/* Section label */}
             <p className="text-center text-[10px] font-black tracking-[0.3em] text-black/40 mb-4">Why PrepApp AI?</p>
             <h2 className="text-center text-[clamp(2rem,5vw,3.5rem)] font-black tracking-tighter text-black mb-16">High-Performance Training.</h2>
@@ -273,7 +273,7 @@ export default function Home() {
 
         {/* ── Email CTA Section ── */}
         <section className="px-6 py-24 bg-[#F9F9F9]">
-          <div className="container mx-auto max-w-2xl text-center">
+          <div className="w-full max-w-2xl mx-auto text-center">
             <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-black tracking-tight text-black mb-10">
               Join the thousands who trust PrepApp AI for their success.
             </h2>

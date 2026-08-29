@@ -83,7 +83,7 @@ export default function AnalyticsPage() {
     return (
         <div className="min-h-screen bg-muted/20 flex flex-col font-sans">
             <Navbar />
-            <div className="flex-1 container mx-auto px-6 py-12 max-w-7xl animate-in fade-in duration-500">
+            <div className="flex-1 w-full px-6 py-12 animate-in fade-in duration-500">
                 <header className="mb-12 border-l-4 border-foreground pl-6">
                     <h2 className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.3em] mb-2">MY PERFORMANCE</h2>
                     <h1 className="text-5xl font-black tracking-tight flex items-center gap-4 text-foreground">
