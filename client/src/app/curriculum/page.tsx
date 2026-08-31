@@ -1,10 +1,42 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Navbar } from "@/components/layout/Navbar"
 import { ChevronDown, ChevronUp, BookOpen, Target, Award, TrendingUp, Clock, Search } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import api from "@/lib/axios"
+
+interface SubTopicApi {
+  id: string
+  title: string
+  order: number
+  isActive: boolean
+}
+
+interface SyllabusTopicApi {
+  id: string
+  title: string
+  description?: string
+  weightage?: string
+  priority: string
+  order: number
+  isActive: boolean
+  subTopics: SubTopicApi[]
+}
+
+interface SyllabusSectionApi {
+  id: string
+  title: string
+  description?: string
+  paper: string
+  icon?: string
+  color?: string
+  bgColor?: string
+  order: number
+  isActive: boolean
+  topics: SyllabusTopicApi[]
+}
 
 interface SyllabusTopic {
   id: string
@@ -22,193 +54,6 @@ interface SyllabusSection {
   color: string
   bgColor: string
   topics: SyllabusTopic[]
-}
-
-const gsPaper1: SyllabusSection = {
-  id: "gs1",
-  title: "General Studies Paper I",
-  icon: <BookOpen className="w-6 h-6" />,
-  color: "text-blue-600",
-  bgColor: "bg-blue-50 border-blue-100",
-  topics: [
-    {
-      id: "history",
-      title: "History of India & Indian National Movement",
-      description: "Ancient, Medieval, Modern Indian History and Freedom Struggle",
-      subtopics: [
-        "Indus Valley Civilization, Vedic Period",
-        "Mauryan & Gupta Empires",
-        "Delhi Sultanate, Mughal Empire",
-        "British Expansion & Economic Policies",
-        "Revolt of 1857, Social Reform Movements",
-        "Indian National Congress, Gandhian Era",
-        "Quit India Movement, Partition & Independence"
-      ],
-      weightage: "~15-20 questions",
-      difficulty: "High"
-    },
-    {
-      id: "geography",
-      title: "Indian & World Geography",
-      description: "Physical, Social, Economic Geography of India and World",
-      subtopics: [
-        "Physical Geography: Landforms, Climate, Oceans",
-        "Indian Physiography, Drainage, Climate",
-        "Natural Resources: Minerals, Energy, Forests",
-        "Agriculture, Industries, Transport",
-        "Population, Urbanization, Settlements",
-        "World Geography: Continents, Major Regions",
-        "Map-based questions"
-      ],
-      weightage: "~10-15 questions",
-      difficulty: "High"
-    },
-    {
-      id: "polity",
-      title: "Indian Polity & Governance",
-      description: "Constitution, Political System, Panchayati Raj, Public Policy",
-      subtopics: [
-        "Constitution: Preamble, Features, Amendments",
-        "Fundamental Rights, Duties, DPSP",
-        "Union & State Executive, Legislature",
-        "Judiciary: Supreme Court, High Courts",
-        "Centre-State Relations, Emergency Provisions",
-        "Panchayati Raj, Municipalities",
-        "Constitutional & Non-Constitutional Bodies"
-      ],
-      weightage: "~15-20 questions",
-      difficulty: "High"
-    },
-    {
-      id: "economy",
-      title: "Economic & Social Development",
-      description: "Sustainable Development, Poverty, Demographics, Social Sector",
-      subtopics: [
-        "National Income, Planning, NITI Aayog",
-        "Money, Banking, Financial Markets",
-        "Public Finance, Budget, Taxation",
-        "Inflation, Employment, Poverty",
-        "Social Sector: Health, Education, Schemes",
-        "Sustainable Development Goals",
-        "Recent Economic Surveys & Budgets"
-      ],
-      weightage: "~10-15 questions",
-      difficulty: "Medium"
-    },
-    {
-      id: "environment",
-      title: "Environment & Ecology",
-      description: "Biodiversity, Climate Change, Conservation, Environmental Laws",
-      subtopics: [
-        "Ecosystem, Biodiversity, Hotspots",
-        "Climate Change: Causes, Impact, Mitigation",
-        "Pollution: Air, Water, Soil, Waste",
-        "Conservation: Protected Areas, Species",
-        "Environmental Laws, Policies, Treaties",
-        "EIA, Green Initiatives, Renewable Energy",
-        "Current Environmental Issues"
-      ],
-      weightage: "~10-15 questions",
-      difficulty: "Medium"
-    },
-    {
-      id: "science",
-      title: "General Science",
-      description: "Physics, Chemistry, Biology basics + Science & Technology",
-      subtopics: [
-        "Physics: Motion, Energy, Light, Sound",
-        "Chemistry: Matter, Reactions, Periodic Table",
-        "Biology: Cell, Genetics, Human Body, Diseases",
-        "Space Technology: ISRO, Missions, Satellites",
-        "Defense Technology: Missiles, Systems",
-        "Biotechnology, Nanotechnology, AI",
-        "Nobel Prizes, Recent Discoveries"
-      ],
-      weightage: "~10-15 questions",
-      difficulty: "Medium"
-    },
-    {
-      id: "current",
-      title: "Current Affairs",
-      description: "National & International Events of Last 12-18 Months",
-      subtopics: [
-        "Government Schemes & Policies",
-        "International Relations, Summits, Treaties",
-        "Economic Developments, Reports, Indices",
-        "Science & Tech Breakthroughs",
-        "Environment & Climate Agreements",
-        "Sports, Awards, Books, Personalities",
-        "State-specific Developments"
-      ],
-      weightage: "~15-25 questions",
-      difficulty: "High"
-    }
-  ]
-}
-
-const gsPaper2: SyllabusSection = {
-  id: "gs2",
-  title: "General Studies Paper II (CSAT)",
-  icon: <Target className="w-6 h-6" />,
-  color: "text-green-600",
-  bgColor: "bg-green-50 border-green-100",
-  topics: [
-    {
-      id: "comprehension",
-      title: "Comprehension",
-      description: "Reading passages with inference-based questions",
-      subtopics: [
-        "Short & Long Passages",
-        "Inference & Assumption Questions",
-        "Tone & Theme Identification",
-        "Vocabulary in Context"
-      ],
-      weightage: "~25-30 questions",
-      difficulty: "Medium"
-    },
-    {
-      id: "reasoning",
-      title: "Logical Reasoning & Analytical Ability",
-      description: "Pattern recognition, logical deduction, analytical puzzles",
-      subtopics: [
-        "Syllogisms, Statements & Conclusions",
-        "Blood Relations, Direction Sense",
-        "Coding-Decoding, Series Completion",
-        "Puzzles: Seating, Scheduling, Grouping",
-        "Data Sufficiency, Decision Making"
-      ],
-      weightage: "~15-20 questions",
-      difficulty: "Medium"
-    },
-    {
-      id: "quantitative",
-      title: "Quantitative Aptitude",
-      description: "Basic numeracy, data interpretation, mental math",
-      subtopics: [
-        "Number System, HCF/LCM, Percentages",
-        "Ratio, Proportion, Partnership",
-        "Time & Work, Time Speed Distance",
-        "Profit Loss, Simple/Compound Interest",
-        "Data Interpretation: Tables, Charts, Graphs",
-        "Permutation, Combination, Probability"
-      ],
-      weightage: "~10-15 questions",
-      difficulty: "Medium"
-    },
-    {
-      id: "decision",
-      title: "Decision Making & Problem Solving",
-      description: "Situational judgment, administrative decision scenarios",
-      subtopics: [
-        "Ethical Decision Making",
-        "Administrative Scenarios",
-        "Policy Implementation Challenges",
-        "Conflict Resolution"
-      ],
-      weightage: "~5-10 questions",
-      difficulty: "Low"
-    }
-  ]
 }
 
 const upscStages = [
@@ -267,6 +112,43 @@ const upscStages = [
     ]
   }
 ]
+
+const iconMap: Record<string, React.ReactNode> = {
+  BookOpen: <BookOpen className="w-6 h-6" />,
+  Target: <Target className="w-6 h-6" />,
+  Award: <Award className="w-6 h-6" />,
+  TrendingUp: <TrendingUp className="w-6 h-6" />,
+}
+
+const priorityToDifficulty = (priority: string): "High" | "Medium" | "Low" => {
+  switch (priority?.toUpperCase()) {
+    case "HIGH": return "High"
+    case "LOW": return "Low"
+    default: return "Medium"
+  }
+}
+
+const transformSection = (apiSection: SyllabusSectionApi): SyllabusSection => ({
+  id: apiSection.id,
+  title: apiSection.title,
+  icon: apiSection.icon && iconMap[apiSection.icon] || <BookOpen className="w-6 h-6" />,
+  color: apiSection.color || "text-blue-600",
+  bgColor: apiSection.bgColor || "bg-blue-50 border-blue-100",
+  topics: apiSection.topics
+    .filter(t => t.isActive)
+    .sort((a, b) => a.order - b.order)
+    .map(topic => ({
+      id: topic.id,
+      title: topic.title,
+      description: topic.description || "",
+      subtopics: topic.subTopics
+        .filter(s => s.isActive)
+        .sort((a, b) => a.order - b.order)
+        .map(s => s.title),
+      weightage: topic.weightage || "",
+      difficulty: priorityToDifficulty(topic.priority)
+    }))
+})
 
 function TopicCard({ topic, index }: { topic: SyllabusTopic; index: number }) {
   const [expanded, setExpanded] = useState(false)
@@ -401,12 +283,65 @@ function StageCard({ stage, index }: { stage: typeof upscStages[0]; index: numbe
 export default function CurriculumPage() {
   const [activeTab, setActiveTab] = useState<"prelims" | "mains" | "stages">("prelims")
   const [searchQuery, setSearchQuery] = useState("")
+  const [sections, setSections] = useState<SyllabusSectionApi[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const allTopics = [...gsPaper1.topics, ...gsPaper2.topics]
+  useEffect(() => {
+    api.get('/curriculum')
+      .then(res => {
+        setSections(res.data)
+        setLoading(false)
+      })
+      .catch(err => {
+        setError('Failed to load curriculum')
+        setLoading(false)
+      })
+  }, [])
+
+  const gsPaper1 = sections.find(s => s.paper === 'GS_PAPER_I')
+  const gsPaper2 = sections.find(s => s.paper === 'GS_PAPER_II_CSAT')
+
+  const transformedGs1 = gsPaper1 ? transformSection(gsPaper1) : null
+  const transformedGs2 = gsPaper2 ? transformSection(gsPaper2) : null
+
+  const allTopics = [...(transformedGs1?.topics || []), ...(transformedGs2?.topics || [])]
   const filteredTopics = allTopics.filter(topic =>
     topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     topic.subtopics.some(sub => sub.toLowerCase().includes(searchQuery.toLowerCase()))
   )
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col font-sans">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="animate-pulse flex flex-col items-center gap-4">
+            <div className="w-12 h-12 bg-black/10 rounded-full" />
+            <div className="h-6 w-64 bg-black/10 rounded" />
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col font-sans">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center px-6">
+            <Search className="w-12 h-12 text-black/20 mx-auto mb-4" />
+            <h3 className="text-xl font-black text-black mb-2">Failed to load curriculum</h3>
+            <p className="text-black/50 font-medium">{error}</p>
+            <button onClick={() => window.location.reload()} className="mt-4 px-6 py-2 bg-black text-white rounded-xl font-black hover:bg-black/85">
+              Retry
+            </button>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans">
@@ -447,8 +382,8 @@ export default function CurriculumPage() {
 
             <div className="flex gap-2 overflow-x-auto pb-2" role="tablist">
               {[
-                { id: "prelims", label: "Prelims GS I", count: gsPaper1.topics.length },
-                { id: "mains", label: "CSAT (GS II)", count: gsPaper2.topics.length },
+                { id: "prelims", label: "Prelims GS I", count: transformedGs1?.topics.length || 0 },
+                { id: "mains", label: "CSAT (GS II)", count: transformedGs2?.topics.length || 0 },
                 { id: "stages", label: "Exam Stages", count: upscStages.length }
               ].map((tab) => (
                 <button
@@ -475,12 +410,12 @@ export default function CurriculumPage() {
         {/* Content */}
         <section className="px-6 py-12 flex-1">
           <div className="w-full max-w-7xl mx-auto">
-            {activeTab === "prelims" && (
-              <SyllabusSection section={gsPaper1} />
+            {activeTab === "prelims" && transformedGs1 && (
+              <SyllabusSection section={transformedGs1} />
             )}
 
-            {activeTab === "mains" && (
-              <SyllabusSection section={gsPaper2} />
+            {activeTab === "mains" && transformedGs2 && (
+              <SyllabusSection section={transformedGs2} />
             )}
 
             {activeTab === "stages" && (

@@ -1,4 +1,4 @@
-import { PrismaClient, Difficulty } from '@prisma/client'
+import { PrismaClient, Difficulty, SyllabusPaper, TopicPriority } from '@prisma/client'
 import { randomBytes } from 'crypto'
 
 const prisma = new PrismaClient()
@@ -160,7 +160,272 @@ async function main() {
         })
     }
 
-    console.log('Seed completed successfully.')
+console.log('Seed completed successfully.')
+
+    // Seed Curriculum
+    await seedCurriculum()
+}
+
+async function seedCurriculum() {
+    console.log('Seeding curriculum...')
+
+    const sections = [
+        {
+            paper: SyllabusPaper.GS_PAPER_I,
+            title: 'General Studies Paper I',
+            description: 'History, Geography, Polity, Economy, Environment, Science & Current Affairs',
+            icon: 'BookOpen',
+            color: 'text-blue-600',
+            bgColor: 'bg-blue-50 border-blue-100',
+            order: 1,
+            topics: [
+                {
+                    title: 'History of India & Indian National Movement',
+                    description: 'Ancient, Medieval, Modern Indian History and Freedom Struggle',
+                    weightage: '~15-20 questions',
+                    priority: TopicPriority.HIGH,
+                    order: 1,
+                    subTopics: [
+                        'Indus Valley Civilization, Vedic Period',
+                        'Mauryan & Gupta Empires',
+                        'Delhi Sultanate, Mughal Empire',
+                        'British Expansion & Economic Policies',
+                        'Revolt of 1857, Social Reform Movements',
+                        'Indian National Congress, Gandhian Era',
+                        'Quit India Movement, Partition & Independence',
+                    ],
+                },
+                {
+                    title: 'Indian & World Geography',
+                    description: 'Physical, Social, Economic Geography of India and World',
+                    weightage: '~10-15 questions',
+                    priority: TopicPriority.HIGH,
+                    order: 2,
+                    subTopics: [
+                        'Physical Geography: Landforms, Climate, Oceans',
+                        'Indian Physiography, Drainage, Climate',
+                        'Natural Resources: Minerals, Energy, Forests',
+                        'Agriculture, Industries, Transport',
+                        'Population, Urbanization, Settlements',
+                        'World Geography: Continents, Major Regions',
+                        'Map-based questions',
+                    ],
+                },
+                {
+                    title: 'Indian Polity & Governance',
+                    description: 'Constitution, Political System, Panchayati Raj, Public Policy',
+                    weightage: '~15-20 questions',
+                    priority: TopicPriority.HIGH,
+                    order: 3,
+                    subTopics: [
+                        'Constitution: Preamble, Features, Amendments',
+                        'Fundamental Rights, Duties, DPSP',
+                        'Union & State Executive, Legislature',
+                        'Judiciary: Supreme Court, High Courts',
+                        'Centre-State Relations, Emergency Provisions',
+                        'Panchayati Raj, Municipalities',
+                        'Constitutional & Non-Constitutional Bodies',
+                    ],
+                },
+                {
+                    title: 'Economic & Social Development',
+                    description: 'Sustainable Development, Poverty, Demographics, Social Sector',
+                    weightage: '~10-15 questions',
+                    priority: TopicPriority.MEDIUM,
+                    order: 4,
+                    subTopics: [
+                        'National Income, Planning, NITI Aayog',
+                        'Money, Banking, Financial Markets',
+                        'Public Finance, Budget, Taxation',
+                        'Inflation, Employment, Poverty',
+                        'Social Sector: Health, Education, Schemes',
+                        'Sustainable Development Goals',
+                        'Recent Economic Surveys & Budgets',
+                    ],
+                },
+                {
+                    title: 'Environment & Ecology',
+                    description: 'Biodiversity, Climate Change, Conservation, Environmental Laws',
+                    weightage: '~10-15 questions',
+                    priority: TopicPriority.MEDIUM,
+                    order: 5,
+                    subTopics: [
+                        'Ecosystem, Biodiversity, Hotspots',
+                        'Climate Change: Causes, Impact, Mitigation',
+                        'Pollution: Air, Water, Soil, Waste',
+                        'Conservation: Protected Areas, Species',
+                        'Environmental Laws, Policies, Treaties',
+                        'EIA, Green Initiatives, Renewable Energy',
+                        'Current Environmental Issues',
+                    ],
+                },
+                {
+                    title: 'General Science',
+                    description: 'Physics, Chemistry, Biology basics + Science & Technology',
+                    weightage: '~10-15 questions',
+                    priority: TopicPriority.MEDIUM,
+                    order: 6,
+                    subTopics: [
+                        'Physics: Motion, Energy, Light, Sound',
+                        'Chemistry: Matter, Reactions, Periodic Table',
+                        'Biology: Cell, Genetics, Human Body, Diseases',
+                        'Space Technology: ISRO, Missions, Satellites',
+                        'Defense Technology: Missiles, Systems',
+                        'Biotechnology, Nanotechnology, AI',
+                        'Nobel Prizes, Recent Discoveries',
+                    ],
+                },
+                {
+                    title: 'Current Affairs',
+                    description: 'National & International Events of Last 12-18 Months',
+                    weightage: '~15-25 questions',
+                    priority: TopicPriority.HIGH,
+                    order: 7,
+                    subTopics: [
+                        'Government Schemes & Policies',
+                        'International Relations, Summits, Treaties',
+                        'Economic Developments, Reports, Indices',
+                        'Science & Tech Breakthroughs',
+                        'Environment & Climate Agreements',
+                        'Sports, Awards, Books, Personalities',
+                        'State-specific Developments',
+                    ],
+                },
+            ],
+        },
+        {
+            paper: SyllabusPaper.GS_PAPER_II_CSAT,
+            title: 'General Studies Paper II (CSAT)',
+            description: 'Comprehension, Reasoning, Quantitative Aptitude, Decision Making',
+            icon: 'Target',
+            color: 'text-green-600',
+            bgColor: 'bg-green-50 border-green-100',
+            order: 2,
+            topics: [
+                {
+                    title: 'Comprehension',
+                    description: 'Reading passages with inference-based questions',
+                    weightage: '~25-30 questions',
+                    priority: TopicPriority.MEDIUM,
+                    order: 1,
+                    subTopics: [
+                        'Short & Long Passages',
+                        'Inference & Assumption Questions',
+                        'Tone & Theme Identification',
+                        'Vocabulary in Context',
+                    ],
+                },
+                {
+                    title: 'Logical Reasoning & Analytical Ability',
+                    description: 'Pattern recognition, logical deduction, analytical puzzles',
+                    weightage: '~15-20 questions',
+                    priority: TopicPriority.MEDIUM,
+                    order: 2,
+                    subTopics: [
+                        'Syllogisms, Statements & Conclusions',
+                        'Blood Relations, Direction Sense',
+                        'Coding-Decoding, Series Completion',
+                        'Puzzles: Seating, Scheduling, Grouping',
+                        'Data Sufficiency, Decision Making',
+                    ],
+                },
+                {
+                    title: 'Quantitative Aptitude',
+                    description: 'Basic numeracy, data interpretation, mental math',
+                    weightage: '~10-15 questions',
+                    priority: TopicPriority.MEDIUM,
+                    order: 3,
+                    subTopics: [
+                        'Number System, HCF/LCM, Percentages',
+                        'Ratio, Proportion, Partnership',
+                        'Time & Work, Time Speed Distance',
+                        'Profit Loss, Simple/Compound Interest',
+                        'Data Interpretation: Tables, Charts, Graphs',
+                        'Permutation, Combination, Probability',
+                    ],
+                },
+                {
+                    title: 'Decision Making & Problem Solving',
+                    description: 'Situational judgment, administrative decision scenarios',
+                    weightage: '~5-10 questions',
+                    priority: TopicPriority.LOW,
+                    order: 4,
+                    subTopics: [
+                        'Ethical Decision Making',
+                        'Administrative Scenarios',
+                        'Policy Implementation Challenges',
+                        'Conflict Resolution',
+                    ],
+                },
+            ],
+        },
+    ]
+
+    for (const sectionData of sections) {
+        const { topics, ...sectionFields } = sectionData
+
+        const existingSection = await prisma.syllabusSection.findUnique({
+            where: { paper: sectionFields.paper },
+        })
+
+        let section
+        if (existingSection) {
+            section = await prisma.syllabusSection.update({
+                where: { paper: sectionFields.paper },
+                data: sectionFields,
+            })
+        } else {
+            section = await prisma.syllabusSection.create({
+                data: sectionFields,
+            })
+        }
+
+        for (const topicData of topics) {
+            const { subTopics, ...topicFields } = topicData
+
+            const existingTopic = await prisma.syllabusTopic.findFirst({
+                where: {
+                    title: topicFields.title,
+                    sectionId: section.id,
+                },
+            })
+
+            let topic
+            if (existingTopic) {
+                topic = await prisma.syllabusTopic.update({
+                    where: { id: existingTopic.id },
+                    data: topicFields,
+                })
+            } else {
+                topic = await prisma.syllabusTopic.create({
+                    data: {
+                        ...topicFields,
+                        sectionId: section.id,
+                    },
+                })
+            }
+
+            for (const subTopicTitle of subTopics) {
+                const existingSub = await prisma.subTopic.findFirst({
+                    where: {
+                        title: subTopicTitle,
+                        topicId: topic.id,
+                    },
+                })
+
+                if (!existingSub) {
+                    await prisma.subTopic.create({
+                        data: {
+                            title: subTopicTitle,
+                            topicId: topic.id,
+                        },
+                    })
+                }
+            }
+        }
+    }
+
+    console.log('Curriculum seeded successfully.')
 }
 
 main()

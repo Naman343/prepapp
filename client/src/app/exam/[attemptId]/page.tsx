@@ -455,7 +455,6 @@ export default function ExamPage({ params }: { params: Promise<{ attemptId: stri
                             </div>
                         </div>
                     </footer>
-                </div>
 
                 {/* Mobile backdrop */}
                 {showPalette && (
