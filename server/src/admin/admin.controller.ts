@@ -131,6 +131,12 @@ export class AdminController {
     return this.adminService.updateQuestion(id, body);
   }
 
+  @Post('questions/bulk-delete')
+  @HttpCode(HttpStatus.OK)
+  deleteQuestions(@Body() body: { ids: string[] }) {
+    return this.adminService.deleteQuestions(body.ids);
+  }
+
   @Delete('questions/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
   deleteQuestion(@Param('id') id: string) {
