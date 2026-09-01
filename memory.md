@@ -57,3 +57,22 @@ Created and updated documentation files detailing application design and logic:
 *   [app-flow.md](file:///C:/Users/siddh/Desktop/prepapp/app-flow.md) — App flow diagram (Candidate and Admin journeys) and screen navigation details.
 *   [backend-schema.md](file:///C:/Users/siddh/Desktop/prepapp/backend-schema.md) — Backend schema description, user database attributes, lifecycle, and API methods.
 *   [architecture.md](file:///C:/Users/siddh/Desktop/prepapp/ARCHITECTURE.md) — Updated database model structures, admin app routes, and admin API endpoints to match the current implementation.
+
+---
+
+## 7. Feature Updates: Bulk Delete Questions & Main Sync (September 1, 2026)
+
+### A. Bulk Delete Questions Functionality
+Added multi-selection and bulk deletion capability on the Admin Questions management page:
+*   **Frontend ([`client/src/app/admin/questions/page.tsx`](file:///C:/Users/siddh/desktop/prepapp/client/src/app/admin/questions/page.tsx)):**
+    *   **Select-All Header Bar:** Supports "Select all on this page", indeterminate checkbox state, selected count display, "Deselect all", and "Delete Selected (X)" button.
+    *   **Row-Level Checkboxes:** Checkbox next to question serial numbers to toggle selection for individual questions.
+    *   **Row Highlight:** Visual highlight for selected questions.
+    *   **Confirmation & Feedback:** Deletion confirmation dialog and spinner feedback during deletion.
+*   **Backend ([`server/src/admin/admin.controller.ts`](file:///C:/Users/siddh/desktop/prepapp/server/src/admin/admin.controller.ts) & [`server/src/admin/admin.service.ts`](file:///C:/Users/siddh/desktop/prepapp/server/src/admin/admin.service.ts)):**
+    *   **Endpoint:** `POST /api/admin/questions/bulk-delete` accepting an array of question IDs (`{ ids: string[] }`).
+    *   **Cascading Clean-up:** Automatically cleans linked `Response` and `Option` records before deleting questions to avoid foreign-key constraint violations.
+
+### B. Git Branch & Remote Sync
+*   **Feature Branch:** Created and pushed `feature/bulk-delete-questions`.
+*   **Main Branch Sync:** Pulled and merged latest commits from `origin/main` (auth/login/signup updates & navbar enhancements) into `feature/bulk-delete-questions` and updated local `main`.
