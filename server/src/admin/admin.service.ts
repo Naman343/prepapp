@@ -282,21 +282,61 @@ export class AdminService {
   ) {
     const { options, ...questionData } = data;
     if (options) {
-      await this.prisma.option.deleteMany({ where: { questionId: id } });
+      const existingOptions = await this.prisma.option.findMany({
+        where: { questionId: id },
+        orderBy: { id: 'asc' },
+      });
+
+      const toUpdate = options.slice(0, existingOptions.length);
+      const toCreate = options.slice(existingOptions.length);
+      const toDelete = existingOptions.slice(options.length);
+
+      for (let i = 0; i < toUpdate.length; i++) {
+        await this.prisma.option.update({
+          where: { id: existingOptions[i].id },
+          data: {
+            text: toUpdate[i].text,
+            isCorrect: toUpdate[i].isCorrect,
+          },
+        });
+      }
+
+      if (toCreate.length > 0) {
+        await this.prisma.option.createMany({
+          data: toCreate.map((o) => ({
+            text: o.text,
+            isCorrect: o.isCorrect,
+            questionId: id,
+          })),
+        });
+      }
+
+      if (toDelete.length > 0) {
+        await this.prisma.option.deleteMany({
+          where: {
+            id: { in: toDelete.map((o) => o.id) },
+          },
+        });
+      }
     }
     return this.prisma.question.update({
       where: { id },
-      data: {
-        ...questionData,
-        ...(options && { options: { create: options } }),
-      },
+      data: questionData,
       include: { options: true },
     });
   }
 
   async deleteQuestion(id: string) {
+    await this.prisma.response.deleteMany({ where: { questionId: id } });
     await this.prisma.option.deleteMany({ where: { questionId: id } });
     return this.prisma.question.delete({ where: { id } });
+  }
+
+  async deleteQuestions(ids: string[]) {
+    if (!ids || ids.length === 0) return { count: 0 };
+    await this.prisma.response.deleteMany({ where: { questionId: { in: ids } } });
+    await this.prisma.option.deleteMany({ where: { questionId: { in: ids } } });
+    return this.prisma.question.deleteMany({ where: { id: { in: ids } } });
   }
 
   // ── Tests ───────────────────────────────────────────────────────────────────

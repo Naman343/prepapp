@@ -420,6 +420,9 @@ export default function QuestionsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null)
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+
   useEffect(() => {
     const handler = () => {
       setShowForm(false)
@@ -457,10 +460,59 @@ export default function QuestionsPage() {
 
   useEffect(() => { fetchQuestions() }, [fetchQuestions])
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const isAllPageSelected = questions.length > 0 && questions.every((q) => selectedIds.has(q.id))
+  const isSomePageSelected = questions.some((q) => selectedIds.has(q.id)) && !isAllPageSelected
+
+  const toggleSelectAllPage = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (isAllPageSelected) {
+        questions.forEach((q) => next.delete(q.id))
+      } else {
+        questions.forEach((q) => next.add(q.id))
+      }
+      return next
+    })
+  }
+
+  const clearSelection = () => {
+    setSelectedIds(new Set())
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this question? This cannot be undone.")) return
     await api.delete(`/admin/questions/${id}`)
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
     fetchQuestions()
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size === 0) return
+    if (!confirm(`Delete ${selectedIds.size} selected question${selectedIds.size > 1 ? "s" : ""}? This cannot be undone.`)) return
+    setBulkDeleting(true)
+    try {
+      await api.post("/admin/questions/bulk-delete", { ids: Array.from(selectedIds) })
+      setSelectedIds(new Set())
+      fetchQuestions()
+    } catch (err: unknown) {
+      const e = err as { response?: { data?: { message?: string } } }
+      alert(e.response?.data?.message || "Failed to delete selected questions")
+    } finally {
+      setBulkDeleting(false)
+    }
   }
 
   const totalPages = Math.ceil(total / limit)
@@ -544,6 +596,61 @@ export default function QuestionsPage() {
 
       {/* Question list */}
       <div className="rounded-xl border border-border bg-card overflow-hidden">
+        {questions.length > 0 && !loading && (
+          <div className="bg-muted/40 border-b border-border px-4 py-2.5 flex items-center justify-between gap-2 text-xs">
+            <label className="flex items-center gap-2.5 cursor-pointer font-medium select-none text-foreground">
+              <input
+                type="checkbox"
+                checked={isAllPageSelected}
+                ref={(el) => {
+                  if (el) el.indeterminate = isSomePageSelected
+                }}
+                onChange={toggleSelectAllPage}
+                className="h-4 w-4 rounded border-input accent-primary cursor-pointer"
+              />
+              <span>
+                {selectedIds.size > 0 ? (
+                  <span className="font-semibold text-foreground">
+                    {selectedIds.size} question{selectedIds.size !== 1 ? "s" : ""} selected
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Select all on this page ({questions.length})</span>
+                )}
+              </span>
+            </label>
+
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={clearSelection}
+                  className="px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground border border-input rounded-md bg-background transition-colors"
+                >
+                  Deselect all
+                </button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  disabled={bulkDeleting}
+                  onClick={handleBulkDelete}
+                  className="h-7 px-3 text-xs bg-red-600 hover:bg-red-700 text-white font-semibold flex items-center gap-1.5 shadow-sm"
+                >
+                  {bulkDeleting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" /> Delete Selected ({selectedIds.size})
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <div className="p-5 text-muted-foreground text-sm">Loading...</div>
         ) : questions.length === 0 ? (
@@ -551,10 +658,24 @@ export default function QuestionsPage() {
         ) : (
           <ul className="divide-y divide-border">
             {questions.map((q, i) => (
-              <li key={q.id} className="p-4 flex gap-3">
-                <span className="text-xs text-muted-foreground w-6 shrink-0 mt-0.5">
-                  {(page - 1) * limit + i + 1}.
-                </span>
+              <li
+                key={q.id}
+                className={`p-4 flex gap-3 transition-colors ${
+                  selectedIds.has(q.id) ? "bg-primary/5 dark:bg-primary/10" : ""
+                }`}
+              >
+                <div className="flex items-center gap-2 shrink-0 self-start mt-0.5">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(q.id)}
+                    onChange={() => toggleSelect(q.id)}
+                    className="h-4 w-4 rounded border-input accent-primary cursor-pointer"
+                    aria-label={`Select question ${q.text.slice(0, 30)}`}
+                  />
+                  <span className="text-xs text-muted-foreground w-6">
+                    {(page - 1) * limit + i + 1}.
+                  </span>
+                </div>
                 <div className="flex-1 min-w-0 space-y-2">
                   <div className="flex items-start gap-2">
                     <p className="text-sm flex-1">{q.text}</p>
